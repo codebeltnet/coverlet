@@ -12,20 +12,19 @@
     <PackageReference Include="Mono.Cecil" />
   </ItemGroup>
 
-  <!-- Use framework-matching versions for copied runtime dependencies to avoid newer generation assets in older TFM groups. -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
-    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" VersionOverride="9.0.20" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" VersionOverride="9.0.20" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="9.0.20" />
-    <PackageReference Include="System.Security.Cryptography.Pkcs" VersionOverride="9.0.20" />
-    <PackageReference Include="System.Text.Json" VersionOverride="9.0.20" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+  <!--
+    Framework-matching versions for copied runtime dependencies: Directory.Packages.props resolves $(MicrosoftNetRuntimeVersion)
+    per target framework (net10.0 -> 10.0.x, net9.0 -> 9.0.x) so no newer generation assets end up in older TFM groups.
+  -->
+  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" />
-    <!-- System.Text.Json is part of .NET 10 framework - no explicit reference needed -->
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <!-- System.Text.Json is part of the .NET 10 framework - the explicit servicing reference is only needed for net9.0 -->
+    <PackageReference Include="System.Text.Json" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" VersionOverride="8.0.0" />
