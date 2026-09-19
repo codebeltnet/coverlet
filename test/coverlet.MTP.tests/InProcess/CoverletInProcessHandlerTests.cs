@@ -18,6 +18,10 @@ public class CoverletInProcessHandlerTests : IDisposable
 
   public CoverletInProcessHandlerTests()
   {
+    // The test host itself may run with the Coverlet MTP extension enabled (e.g. `dotnet test -- --coverlet`),
+    // which injects COVERLET_MTP_* variables into this process. Start every test from a clean slate.
+    ClearEnvironmentVariables();
+
     _mockLoggerFactory
       .Setup(x => x.CreateLogger(It.IsAny<string>()))
       .Returns(_mockLogger.Object);
