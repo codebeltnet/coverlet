@@ -84,7 +84,7 @@ jobs:
 
       - name: Run package validation tests
         shell: pwsh
-        run: dotnet test test/coverlet.MTP.validation.tests/coverlet.MTP.validation.tests.csproj -c Release -f ${{ matrix.framework }} --logger "trx;LogFileName=coverlet.MTP.validation.tests.${{ matrix.framework }}.trx"
+        run: dotnet test test/coverlet.MTP.validation.tests/coverlet.MTP.validation.tests.csproj -c Release -f ${{ matrix.framework }} -- --report-trx --report-trx-filename "coverlet.MTP.validation.tests.${{ matrix.framework }}.trx"
 
   publish_nuget:
     if: ${{ github.event_name != 'pull_request' && needs.build.result == 'success' && needs.test.result == 'success' && needs.pack.result == 'success' && needs.package_validation.result == 'success' }}
