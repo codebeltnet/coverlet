@@ -19,6 +19,7 @@ namespace Coverlet.Core.Helpers
   internal class InstrumentationHelper : IInstrumentationHelper
   {
     private const int RetryAttempts = 12;
+    private const string RestoreStagingSuffix = ".coverlet.restore";
     private readonly ConcurrentDictionary<string, string> _backupList = new();
     private readonly IRetryHelper _retryHelper;
     private readonly IFileSystem _fileSystem;
@@ -293,8 +294,7 @@ namespace Coverlet.Core.Helpers
 
       _retryHelper.Retry(() =>
       {
-        _fileSystem.Copy(backupPath, module, true);
-        _fileSystem.Delete(backupPath);
+        RestoreFromBackup(backupPath, module);
         _backupList.TryRemove(module, out _);
         _logger.LogVerbose($"Restored module from backup: '{module}'");
       }, retryStrategy, RetryAttempts);
@@ -304,8 +304,7 @@ namespace Coverlet.Core.Helpers
         string symbolFile = Path.ChangeExtension(module, ".pdb");
         if (_fileSystem.Exists(backupSymbolPath))
         {
-          _fileSystem.Copy(backupSymbolPath, symbolFile, true);
-          _fileSystem.Delete(backupSymbolPath);
+          RestoreFromBackup(backupSymbolPath, symbolFile);
           _backupList.TryRemove(symbolFile, out _);
           _logger.LogVerbose($"Restored symbol file from backup: '{symbolFile}'");
         }
@@ -350,11 +349,48 @@ namespace Coverlet.Core.Helpers
 
         _retryHelper.Retry(() =>
         {
-          _fileSystem.Copy(backupPath, key, true);
-          _fileSystem.Delete(backupPath);
+          RestoreFromBackup(backupPath, key);
           _backupList.TryRemove(key, out _);
           _logger.LogVerbose($"Restored from backup (ProcessExit): '{key}'");
         }, retryStrategy, RetryAttempts);
+      }
+    }
+
+    /// <summary>
+    /// Puts a backed-up file back in place. The backup is staged as a copy next to <paramref name="targetPath"/> and then
+    /// swapped in with a rename. On POSIX the rename replaces the directory entry atomically and leaves a still memory-mapped
+    /// (loaded) image untouched, whereas copying over the target in place overwrites the bytes of a loaded assembly and
+    /// corrupts its metadata. Staging in the target directory keeps the rename on a single file system.
+    /// </summary>
+    private void RestoreFromBackup(string backupPath, string targetPath)
+    {
+      string stagingPath = targetPath + RestoreStagingSuffix;
+      try
+      {
+        _fileSystem.Copy(backupPath, stagingPath, true);
+        _fileSystem.Move(stagingPath, targetPath, true);
+      }
+      catch
+      {
+        TryDeleteStagingFile(stagingPath);
+        throw;
+      }
+
+      _fileSystem.Delete(backupPath);
+    }
+
+    private void TryDeleteStagingFile(string stagingPath)
+    {
+      try
+      {
+        if (_fileSystem.Exists(stagingPath))
+        {
+          _fileSystem.Delete(stagingPath);
+        }
+      }
+      catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+      {
+        _logger.LogVerbose($"Could not remove restore staging file '{stagingPath}': {ex.Message}");
       }
     }
 

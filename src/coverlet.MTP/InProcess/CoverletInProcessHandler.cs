@@ -110,7 +110,7 @@ internal sealed class CoverletInProcessHandler : ITestSessionLifetimeHandler
 
     foreach (EventHandler handler in handlersSnapshot)
     {
-      string assemblyName = handler.Method?.DeclaringType?.Assembly?.GetName().Name ?? "(unknown)";
+      string assemblyName = GetAssemblyName(handler);
       try
       {
         _logger.LogDebug($"[Coverlet.MTP.InProcess] Flushing coverage for '{assemblyName}'");
@@ -129,5 +129,23 @@ internal sealed class CoverletInProcessHandler : ITestSessionLifetimeHandler
     }
 
     _logger.LogDebug($"[Coverlet.MTP.InProcess] Flushed {flushedCount} instrumented assemblies");
+  }
+
+  /// <summary>
+  /// Resolves the name of the assembly that owns <paramref name="handler"/> for diagnostic messages only.
+  /// Reflection over a loaded module can fail (e.g. <see cref="System.Globalization.CultureNotFoundException"/> when the
+  /// instrumented file was restored on disk while still mapped), and that must never abort the flush or crash the test host.
+  /// </summary>
+  private string GetAssemblyName(EventHandler handler)
+  {
+    try
+    {
+      return handler.Method?.DeclaringType?.Assembly?.GetName().Name ?? "(unknown)";
+    }
+    catch (Exception ex)
+    {
+      _logger.LogDebug($"[Coverlet.MTP.InProcess] Could not resolve assembly name for tracker handler: {ex.GetType().Name}: {ex.Message}");
+      return "(unknown)";
+    }
   }
 }

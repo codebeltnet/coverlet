@@ -60,8 +60,10 @@ namespace Coverlet.Core.Helpers
           // do nothing
           return default;
         }
-        catch (IOException ex)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
+          // Windows reports a rename/delete against a file that is still mapped (loaded assembly) as
+          // ERROR_ACCESS_DENIED, i.e. UnauthorizedAccessException, so treat it like a sharing violation.
           exceptions.Add(ex);
         }
       }

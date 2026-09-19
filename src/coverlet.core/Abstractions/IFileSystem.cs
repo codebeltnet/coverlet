@@ -18,6 +18,8 @@ namespace Coverlet.Core.Abstractions
 
     void Copy(string sourceFileName, string destFileName, bool overwrite);
 
+    void Move(string sourceFileName, string destFileName, bool overwrite);
+
     void Delete(string path);
 
     Stream NewFileStream(string path, FileMode mode);

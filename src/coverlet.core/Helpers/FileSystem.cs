@@ -42,6 +42,20 @@ namespace Coverlet.Core.Helpers
       File.Copy(sourceFileName, destFileName, overwrite);
     }
 
+    public void Move(string sourceFileName, string destFileName, bool overwrite)
+    {
+#if NETSTANDARD2_0
+      if (overwrite && File.Exists(destFileName))
+      {
+        File.Delete(destFileName);
+      }
+
+      File.Move(sourceFileName, destFileName);
+#else
+      File.Move(sourceFileName, destFileName, overwrite);
+#endif
+    }
+
     public void Delete(string path)
     {
       File.Delete(path);
