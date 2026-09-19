@@ -573,6 +573,97 @@ namespace Coverlet.Core.Tests.Helpers
     }
 
     [Fact]
+    public void TestRestoreOriginalModule_WithValidBackup_SwapsStagedCopyIntoPlace()
+    {
+      // Arrange
+      var mockLogger = new Mock<ILogger>();
+      var mockFileSystem = new Mock<IFileSystem>();
+      var mockRetryHelper = new Mock<IRetryHelper>();
+      var mockProcessExitHandler = new Mock<IProcessExitHandler>();
+      var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+
+      string modulePath = Path.Combine(Path.GetTempPath(), "TestModule.dll");
+      string identifier = Guid.NewGuid().ToString();
+      string backupPath = Path.Combine(Path.GetTempPath(), "TestModule_" + identifier + ".dll");
+      string stagingPath = modulePath + ".coverlet.restore";
+
+      mockFileSystem.Setup(x => x.Exists(backupPath)).Returns(true);
+      mockRetryHelper
+        .Setup(x => x.Retry(It.IsAny<Action>(), It.IsAny<Func<TimeSpan>>(), It.IsAny<int>()))
+        .Callback<Action, Func<TimeSpan>, int>((action, _, _) => action());
+
+      var instrumentationHelper = new InstrumentationHelper(
+        mockProcessExitHandler.Object,
+        mockRetryHelper.Object,
+        mockFileSystem.Object,
+        mockLogger.Object,
+        mockSourceRootTranslator.Object);
+
+      instrumentationHelper.BackupOriginalModule(modulePath, identifier, false);
+
+      // Act
+      instrumentationHelper.RestoreOriginalModule(modulePath, identifier);
+
+      // Assert - the backup is staged beside the module and swapped in by rename; the module is never overwritten in place
+      mockFileSystem.Verify(x => x.Copy(backupPath, stagingPath, true), Times.Once);
+      mockFileSystem.Verify(x => x.Move(stagingPath, modulePath, true), Times.Once);
+      mockFileSystem.Verify(x => x.Copy(It.IsAny<string>(), modulePath, It.IsAny<bool>()), Times.Never);
+      mockFileSystem.Verify(x => x.Delete(backupPath), Times.Once);
+      mockLogger.Verify(x => x.LogVerbose(It.Is<string>(s => s.Contains("Restored module from backup"))), Times.Once);
+    }
+
+    [Fact]
+    public void TestRestoreOriginalModule_WhenSwapFails_RemovesStagingFileAndKeepsBackup()
+    {
+      // Arrange
+      var mockLogger = new Mock<ILogger>();
+      var mockFileSystem = new Mock<IFileSystem>();
+      var mockRetryHelper = new Mock<IRetryHelper>();
+      var mockProcessExitHandler = new Mock<IProcessExitHandler>();
+      var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+
+      string modulePath = Path.Combine(Path.GetTempPath(), "TestModule.dll");
+      string identifier = Guid.NewGuid().ToString();
+      string backupPath = Path.Combine(Path.GetTempPath(), "TestModule_" + identifier + ".dll");
+      string stagingPath = modulePath + ".coverlet.restore";
+
+      mockFileSystem.Setup(x => x.Exists(backupPath)).Returns(true);
+      mockFileSystem.Setup(x => x.Exists(stagingPath)).Returns(true);
+      mockFileSystem
+        .Setup(x => x.Move(stagingPath, modulePath, true))
+        .Throws(new UnauthorizedAccessException("Access to the path is denied."));
+      mockRetryHelper
+        .Setup(x => x.Retry(It.IsAny<Action>(), It.IsAny<Func<TimeSpan>>(), It.IsAny<int>()))
+        .Callback<Action, Func<TimeSpan>, int>((action, _, _) =>
+        {
+          try
+          {
+            action();
+          }
+          catch (UnauthorizedAccessException)
+          {
+            // The real retry helper retries and eventually gives up; the test only cares about the cleanup.
+          }
+        });
+
+      var instrumentationHelper = new InstrumentationHelper(
+        mockProcessExitHandler.Object,
+        mockRetryHelper.Object,
+        mockFileSystem.Object,
+        mockLogger.Object,
+        mockSourceRootTranslator.Object);
+
+      instrumentationHelper.BackupOriginalModule(modulePath, identifier, false);
+
+      // Act
+      instrumentationHelper.RestoreOriginalModule(modulePath, identifier);
+
+      // Assert - the staged copy is cleaned up and the backup is kept for a later restore attempt
+      mockFileSystem.Verify(x => x.Delete(stagingPath), Times.Once);
+      mockFileSystem.Verify(x => x.Delete(backupPath), Times.Never);
+    }
+
+    [Fact]
     public void TestRestoreOriginalModule_WithValidBackup_RestoresSuccessfully()
     {
       // Arrange
