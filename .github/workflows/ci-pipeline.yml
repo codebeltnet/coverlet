@@ -88,16 +88,29 @@ jobs:
 
   publish_nuget:
     if: ${{ github.event_name != 'pull_request' && needs.build.result == 'success' && needs.test.result == 'success' && needs.pack.result == 'success' && needs.package_validation.result == 'success' }}
-    name: call-nuget
+    name: publish-nuget
     needs: [build, test, pack, package_validation]
-    uses: codebeltnet/jobs-nuget-push/.github/workflows/default.yml@v3
-    with:
-      version: ${{ needs.build.outputs.version }}
-      environment: Production
-      configuration: Release
-      download-build-artifact-name: NuGet-Release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: Production
     permissions:
       contents: read
-      packages: write
-    secrets:
-      NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+      id-token: write
+    steps:
+      - name: Download packaged artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: NuGet-Release
+          path: artifacts/package/release
+
+      - name: NuGet login (OIDC -> temporary API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ vars.NUGET_USER }}
+
+      - name: Push NuGet packages
+        shell: bash
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: dotnet nuget push 'artifacts/package/release/*.nupkg' --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
