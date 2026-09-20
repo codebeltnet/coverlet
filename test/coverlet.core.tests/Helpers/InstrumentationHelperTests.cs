@@ -102,16 +102,31 @@ namespace Coverlet.Core.Tests.Helpers
     {
       string module = typeof(InstrumentationHelperTests).Assembly.Location;
       string identifier = Guid.NewGuid().ToString();
-
-      // Ensure the backup list is used to restore the original module
-      _instrumentationHelper.BackupOriginalModule(module, identifier, false);
-
       string backupPath = Path.Combine(
           Path.GetTempPath(),
           Path.GetFileNameWithoutExtension(module) + "_" + identifier + ".dll"
       );
+      string backupSymbolPath = Path.ChangeExtension(backupPath, ".pdb");
 
-      Assert.True(File.Exists(backupPath));
+      try
+      {
+        // Ensure the backup list is used to restore the original module
+        _instrumentationHelper.BackupOriginalModule(module, identifier, false);
+
+        Assert.True(File.Exists(backupPath));
+      }
+      finally
+      {
+        if (File.Exists(backupPath))
+        {
+          File.Delete(backupPath);
+        }
+
+        if (File.Exists(backupSymbolPath))
+        {
+          File.Delete(backupSymbolPath);
+        }
+      }
     }
 
     [Theory]
@@ -485,14 +500,20 @@ namespace Coverlet.Core.Tests.Helpers
     {
       // Arrange
       var mockLogger = new Mock<ILogger>();
+      var mockFileSystem = new Mock<IFileSystem>();
+      var mockRetryHelper = new Mock<IRetryHelper>();
+      var mockProcessExitHandler = new Mock<IProcessExitHandler>();
       var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
       string currentAssembly = typeof(InstrumentationHelperTests).Assembly.Location;
       string identifier = Guid.NewGuid().ToString();
 
+      mockFileSystem.Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
+      mockFileSystem.Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()));
+
       var instrumentationHelper = new InstrumentationHelper(
-        new ProcessExitHandler(),
-        new RetryHelper(),
-        new FileSystem(),
+        mockProcessExitHandler.Object,
+        mockRetryHelper.Object,
+        mockFileSystem.Object,
         mockLogger.Object,
         mockSourceRootTranslator.Object);
 
@@ -504,6 +525,7 @@ namespace Coverlet.Core.Tests.Helpers
 
       // Assert - Should log that it's skipping the running assembly
       mockLogger.Verify(x => x.LogVerbose(It.Is<string>(s => s.Contains("Skipping restore of currently running assembly"))), Times.AtLeastOnce);
+      mockRetryHelper.Verify(x => x.Retry(It.IsAny<Action>(), It.IsAny<Func<TimeSpan>>(), It.IsAny<int>()), Times.Never);
     }
 
     #endregion

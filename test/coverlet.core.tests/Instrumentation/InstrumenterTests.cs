@@ -762,6 +762,17 @@ public class SampleClass
 
         string runtimeVersion = new DirectoryInfo(Path.GetDirectoryName(typeof(object).Assembly.Location)!).Name;
         var runtimeAssemblyVersion = typeof(object).Assembly.GetName().Version;
+        string runtimeRootPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(typeof(object).Assembly.Location)!, "..", ".."));
+        string runtimeDirectory = Path.Combine(runtimeRootPath, "Microsoft.NETCore.App");
+        string majorVersion = $"{runtimeAssemblyVersion.Major}.{runtimeAssemblyVersion.Minor}.";
+
+        if (Directory.GetDirectories(runtimeDirectory, majorVersion + "*", SearchOption.TopDirectoryOnly)
+            .Select(Path.GetFileName)
+            .Any(name => !uint.TryParse(name[majorVersion.Length..], out _)))
+        {
+          return;
+        }
+
         string runtimeConfigFile = Path.Combine(tempDirectory, "testhost.runtimeconfig.json");
         File.WriteAllText(runtimeConfigFile,
             "{\n" +
