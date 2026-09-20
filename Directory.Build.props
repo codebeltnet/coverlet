@@ -2,6 +2,7 @@
 <Project>
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
+    <IsSourceProject>$(MSBuildProjectDirectory.ToLower().StartsWith('$(MSBuildThisFileDirectory.ToLower())src'))</IsSourceProject>
     <FullFrameworkTFM>net472</FullFrameworkTFM>
     <!-- enforce CamelCase case string-->
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -44,6 +45,10 @@
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsSourceProject)' == 'true'">
+    <MinVerTagPrefix>v</MinVerTagPrefix>
   </PropertyGroup>
 
 </Project>
