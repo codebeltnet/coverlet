@@ -18,6 +18,10 @@ public class CoverletInProcessHandlerTests : IDisposable
 
   public CoverletInProcessHandlerTests()
   {
+    // The test host itself may run with the Coverlet MTP extension enabled (e.g. `dotnet test -- --coverlet`),
+    // which injects COVERLET_MTP_* variables into this process. Start every test from a clean slate.
+    ClearEnvironmentVariables();
+
     _mockLoggerFactory
       .Setup(x => x.CreateLogger(It.IsAny<string>()))
       .Returns(_mockLogger.Object);
@@ -442,6 +446,60 @@ public class CoverletInProcessHandlerTests : IDisposable
           It.IsAny<Exception?>(),
           It.IsAny<Func<string, Exception?, string>>()),
         Times.AtLeastOnce);
+    }
+    finally
+    {
+      AppDomain.CurrentDomain.SetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey, null);
+    }
+  }
+
+  [Fact]
+  public async Task OnTestSessionFinishingAsyncWhenAssemblyNameResolutionFailsFallsBackToUnknownAndContinues()
+  {
+    // Arrange
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.CoverageEnabled, "true");
+    System.Environment.SetEnvironmentVariable(CoverletMtpEnvironmentVariables.InProcessExceptionLog, "0");
+
+    var handler = new CoverletInProcessHandler(_mockLoggerFactory.Object);
+    var mockSessionContext = new Mock<ITestSessionContext>();
+    mockSessionContext.Setup(x => x.SessionUid).Returns(new Microsoft.Testing.Platform.TestHost.SessionUid("test-unknown-assembly-name"));
+
+    bool flushedSecondHandler = false;
+    var registry = new List<EventHandler>
+    {
+      null!,
+      (_, _) => flushedSecondHandler = true
+    };
+    AppDomain.CurrentDomain.SetData(ModuleTrackerTemplate.ModuleTrackerRegistryKey, registry);
+
+    try
+    {
+      // Act
+      await ((ITestSessionLifetimeHandler)handler).OnTestSessionFinishingAsync(mockSessionContext.Object);
+
+      // Assert
+      Assert.True(flushedSecondHandler);
+      _mockLogger.Verify(
+        x => x.Log(
+          It.Is<LogLevel>(l => l == LogLevel.Debug),
+          It.Is<string>(s => s.Contains("Could not resolve assembly name")),
+          It.IsAny<Exception?>(),
+          It.IsAny<Func<string, Exception?, string>>()),
+        Times.Once);
+      _mockLogger.Verify(
+        x => x.Log(
+          It.Is<LogLevel>(l => l == LogLevel.Error),
+          It.Is<string>(s => s.Contains("Failed to flush coverage for '(unknown)'")),
+          It.IsAny<Exception?>(),
+          It.IsAny<Func<string, Exception?, string>>()),
+        Times.Once);
+      _mockLogger.Verify(
+        x => x.Log(
+          It.Is<LogLevel>(l => l == LogLevel.Debug),
+          It.Is<string>(s => s.Contains("Successfully flushed coverage for")),
+          It.IsAny<Exception?>(),
+          It.IsAny<Func<string, Exception?, string>>()),
+        Times.Once);
     }
     finally
     {

@@ -102,16 +102,31 @@ namespace Coverlet.Core.Tests.Helpers
     {
       string module = typeof(InstrumentationHelperTests).Assembly.Location;
       string identifier = Guid.NewGuid().ToString();
-
-      // Ensure the backup list is used to restore the original module
-      _instrumentationHelper.BackupOriginalModule(module, identifier, false);
-
       string backupPath = Path.Combine(
           Path.GetTempPath(),
           Path.GetFileNameWithoutExtension(module) + "_" + identifier + ".dll"
       );
+      string backupSymbolPath = Path.ChangeExtension(backupPath, ".pdb");
 
-      Assert.True(File.Exists(backupPath));
+      try
+      {
+        // Ensure the backup list is used to restore the original module
+        _instrumentationHelper.BackupOriginalModule(module, identifier, false);
+
+        Assert.True(File.Exists(backupPath));
+      }
+      finally
+      {
+        if (File.Exists(backupPath))
+        {
+          File.Delete(backupPath);
+        }
+
+        if (File.Exists(backupSymbolPath))
+        {
+          File.Delete(backupSymbolPath);
+        }
+      }
     }
 
     [Theory]
@@ -485,14 +500,20 @@ namespace Coverlet.Core.Tests.Helpers
     {
       // Arrange
       var mockLogger = new Mock<ILogger>();
+      var mockFileSystem = new Mock<IFileSystem>();
+      var mockRetryHelper = new Mock<IRetryHelper>();
+      var mockProcessExitHandler = new Mock<IProcessExitHandler>();
       var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
       string currentAssembly = typeof(InstrumentationHelperTests).Assembly.Location;
       string identifier = Guid.NewGuid().ToString();
 
+      mockFileSystem.Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
+      mockFileSystem.Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()));
+
       var instrumentationHelper = new InstrumentationHelper(
-        new ProcessExitHandler(),
-        new RetryHelper(),
-        new FileSystem(),
+        mockProcessExitHandler.Object,
+        mockRetryHelper.Object,
+        mockFileSystem.Object,
         mockLogger.Object,
         mockSourceRootTranslator.Object);
 
@@ -504,6 +525,7 @@ namespace Coverlet.Core.Tests.Helpers
 
       // Assert - Should log that it's skipping the running assembly
       mockLogger.Verify(x => x.LogVerbose(It.Is<string>(s => s.Contains("Skipping restore of currently running assembly"))), Times.AtLeastOnce);
+      mockRetryHelper.Verify(x => x.Retry(It.IsAny<Action>(), It.IsAny<Func<TimeSpan>>(), It.IsAny<int>()), Times.Never);
     }
 
     #endregion
@@ -570,6 +592,97 @@ namespace Coverlet.Core.Tests.Helpers
 
       // Assert
       mockLogger.Verify(x => x.LogWarning(It.Is<string>(s => s.Contains("Backup file not found"))), Times.Once);
+    }
+
+    [Fact]
+    public void TestRestoreOriginalModule_WithValidBackup_SwapsStagedCopyIntoPlace()
+    {
+      // Arrange
+      var mockLogger = new Mock<ILogger>();
+      var mockFileSystem = new Mock<IFileSystem>();
+      var mockRetryHelper = new Mock<IRetryHelper>();
+      var mockProcessExitHandler = new Mock<IProcessExitHandler>();
+      var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+
+      string modulePath = Path.Combine(Path.GetTempPath(), "TestModule.dll");
+      string identifier = Guid.NewGuid().ToString();
+      string backupPath = Path.Combine(Path.GetTempPath(), "TestModule_" + identifier + ".dll");
+      string stagingPath = modulePath + ".coverlet.restore";
+
+      mockFileSystem.Setup(x => x.Exists(backupPath)).Returns(true);
+      mockRetryHelper
+        .Setup(x => x.Retry(It.IsAny<Action>(), It.IsAny<Func<TimeSpan>>(), It.IsAny<int>()))
+        .Callback<Action, Func<TimeSpan>, int>((action, _, _) => action());
+
+      var instrumentationHelper = new InstrumentationHelper(
+        mockProcessExitHandler.Object,
+        mockRetryHelper.Object,
+        mockFileSystem.Object,
+        mockLogger.Object,
+        mockSourceRootTranslator.Object);
+
+      instrumentationHelper.BackupOriginalModule(modulePath, identifier, false);
+
+      // Act
+      instrumentationHelper.RestoreOriginalModule(modulePath, identifier);
+
+      // Assert - the backup is staged beside the module and swapped in by rename; the module is never overwritten in place
+      mockFileSystem.Verify(x => x.Copy(backupPath, stagingPath, true), Times.Once);
+      mockFileSystem.Verify(x => x.Move(stagingPath, modulePath, true), Times.Once);
+      mockFileSystem.Verify(x => x.Copy(It.IsAny<string>(), modulePath, It.IsAny<bool>()), Times.Never);
+      mockFileSystem.Verify(x => x.Delete(backupPath), Times.Once);
+      mockLogger.Verify(x => x.LogVerbose(It.Is<string>(s => s.Contains("Restored module from backup"))), Times.Once);
+    }
+
+    [Fact]
+    public void TestRestoreOriginalModule_WhenSwapFails_RemovesStagingFileAndKeepsBackup()
+    {
+      // Arrange
+      var mockLogger = new Mock<ILogger>();
+      var mockFileSystem = new Mock<IFileSystem>();
+      var mockRetryHelper = new Mock<IRetryHelper>();
+      var mockProcessExitHandler = new Mock<IProcessExitHandler>();
+      var mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
+
+      string modulePath = Path.Combine(Path.GetTempPath(), "TestModule.dll");
+      string identifier = Guid.NewGuid().ToString();
+      string backupPath = Path.Combine(Path.GetTempPath(), "TestModule_" + identifier + ".dll");
+      string stagingPath = modulePath + ".coverlet.restore";
+
+      mockFileSystem.Setup(x => x.Exists(backupPath)).Returns(true);
+      mockFileSystem.Setup(x => x.Exists(stagingPath)).Returns(true);
+      mockFileSystem
+        .Setup(x => x.Move(stagingPath, modulePath, true))
+        .Throws(new UnauthorizedAccessException("Access to the path is denied."));
+      mockRetryHelper
+        .Setup(x => x.Retry(It.IsAny<Action>(), It.IsAny<Func<TimeSpan>>(), It.IsAny<int>()))
+        .Callback<Action, Func<TimeSpan>, int>((action, _, _) =>
+        {
+          try
+          {
+            action();
+          }
+          catch (UnauthorizedAccessException)
+          {
+            // The real retry helper retries and eventually gives up; the test only cares about the cleanup.
+          }
+        });
+
+      var instrumentationHelper = new InstrumentationHelper(
+        mockProcessExitHandler.Object,
+        mockRetryHelper.Object,
+        mockFileSystem.Object,
+        mockLogger.Object,
+        mockSourceRootTranslator.Object);
+
+      instrumentationHelper.BackupOriginalModule(modulePath, identifier, false);
+
+      // Act
+      instrumentationHelper.RestoreOriginalModule(modulePath, identifier);
+
+      // Assert - the staged copy is cleaned up and the backup is kept for a later restore attempt
+      mockFileSystem.Verify(x => x.Delete(stagingPath), Times.Once);
+      mockFileSystem.Verify(x => x.Delete(backupPath), Times.Never);
     }
 
     [Fact]

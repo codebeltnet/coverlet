@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$(RepoRoot)src\legacy\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.props" Condition="'$(LEGACY)' != '' " />
 
   <PropertyGroup>
-    <TargetFrameworks>$(NetMinimum);$(NetCurrent)</TargetFrameworks>
+    <TargetFrameworks>net9.0;net10.0</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <DebugType>portable</DebugType>
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
@@ -22,6 +21,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Microsoft.Testing.Extensions.AzureDevOpsReport" />
+    <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
     <PackageReference Include="Moq" />
     <PackageReference Include="ReportGenerator.Core" />
@@ -44,6 +44,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\coverlet.core\coverlet.core.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\coverlet.MTP\coverlet.MTP.csproj" />
     <ProjectReference Include="$(RepoRoot)test\coverlet.tests.utils\coverlet.tests.utils.csproj" />
 
     <ProjectReference Include="$(RepoRoot)test\coverlet.core.tests.samples.netstandard\coverlet.core.tests.samples.netstandard.csproj" />
@@ -88,5 +89,6 @@
     <Copy SourceFiles="@(ExcludedByAttributeFiles)" DestinationFolder="$(OutputPath)TestAssets" SkipUnchangedFiles="true" />
   </Target>
 
-  <Import Project="$(RepoRoot)src\legacy\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.targets" Condition="'$(LEGACY)' != '' " />
+  <!-- Registers the Coverlet MTP extension for the codebeltnet/jobs-dotnet-test workflow (same hook the NuGet package ships). -->
+  <Import Project="$(RepoRoot)src\coverlet.MTP\buildMultiTargeting\Codebelt.Coverlet.MTP.props" />
 </Project>

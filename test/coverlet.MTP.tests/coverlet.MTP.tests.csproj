@@ -1,8 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$(RepoRoot)src\legacy\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.props" Condition="'$(LEGACY)' != '' " />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>$(NetCurrent);$(NetMinimum)</TargetFrameworks>
+    <TargetFrameworks>net9.0;net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
@@ -25,14 +24,13 @@
 
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)\src\coverlet.MTP\coverlet.MTP.csproj">
-      <SetTargetFramework Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) != '.NETCoreApp'">TargetFramework=netstandard2.0</SetTargetFramework>
     </ProjectReference>
     <ProjectReference Include="$(RepoRoot)\src\coverlet.core\coverlet.core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- required for code coverage using dotnet command -->
-    <PackageReference Include="Newtonsoft.Json" VersionOverride="13.0.4" />
+    <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
   </ItemGroup>
   
@@ -40,6 +38,7 @@
     <PackageReference Include="Moq" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
     <PackageReference Include="Microsoft.Testing.Extensions.AzureDevOpsReport" />
+    <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
     <PackageReference Include="xunit.v3.mtp-v2" />
     <PackageReference Include="xunit.runner.visualstudio">
@@ -57,5 +56,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <Import Project="$(RepoRoot)src\legacy\coverlet.msbuild.tasks\buildMultiTargeting\coverlet.msbuild.targets" Condition="'$(LEGACY)' != '' "/>
+
+  <!-- Registers the Coverlet MTP extension for the codebeltnet/jobs-dotnet-test workflow (same hook the NuGet package ships). -->
+  <Import Project="$(RepoRoot)\src\coverlet.MTP\buildMultiTargeting\Codebelt.Coverlet.MTP.props" />
 </Project>
