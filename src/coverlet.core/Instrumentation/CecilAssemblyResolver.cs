@@ -455,30 +455,10 @@ namespace Coverlet.Core.Instrumentation
             {
               var semVersion = NuGetVersion.Parse(frameworkVersion);
               var directory = new DirectoryInfo(Path.Combine(runtimeRootPath, frameworkName));
-              DirectoryInfo resolvedDirectory = null;
-              NuGetVersion resolvedVersion = null;
-              foreach (DirectoryInfo candidateDirectory in directory.GetDirectories())
-              {
-                if (!NuGetVersion.TryParse(candidateDirectory.Name, out NuGetVersion candidateVersion) ||
-                    candidateVersion.Major != semVersion.Major ||
-                    candidateVersion.Minor != semVersion.Minor)
-                {
-                  continue;
-                }
-
-                if (resolvedVersion is null || candidateVersion.CompareTo(resolvedVersion) > 0)
-                {
-                  resolvedDirectory = candidateDirectory;
-                  resolvedVersion = candidateVersion;
-                }
-              }
-
-              if (resolvedDirectory is null)
-              {
-                continue;
-              }
-
-              string resolvedPath = resolvedDirectory.FullName;
+              string majorVersion = $"{semVersion.Major}.{semVersion.Minor}.";
+              uint latestVersion = directory.GetDirectories().Where(x => x.Name.StartsWith(majorVersion))
+                  .Select(x => Convert.ToUInt32(x.Name.Substring(majorVersion.Length))).Max();
+              string resolvedPath = Directory.GetDirectories(directory.FullName, majorVersion + $"{latestVersion}*", SearchOption.TopDirectoryOnly)[0];
               if (!_aspNetSharedFrameworkDirs.Any(path => path.Equals(resolvedPath, StringComparison.OrdinalIgnoreCase)))
               {
                 _aspNetSharedFrameworkDirs.Add(resolvedPath);
