@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [10.1.0] - 2026-09-27
+
+This release synchronizes the Codebelt.Coverlet.MTP fork with upstream coverlet 10.1.0 fixes that apply to the narrowed MTP/core package surface while preserving the fork's multi-targeted package layout.
+
+### Fixed
+
+- Honor the Microsoft Testing Platform `--config-file` argument in coverlet.MTP instead of falling back directly to legacy `coverlet.mtp.appsettings.json` discovery.
+- Resolve shared-framework assemblies that are missing from `compileLibraries` by falling back to `NetCoreSharedFrameworkResolver`, preventing silently empty coverage for modules affected by newer SDK dependency context behavior.
+- Add regression coverage for `ExcludeByAttribute=CompilerGeneratedAttribute` so async state-machine methods remain instrumented.
+
 ## [10.0.1] - 2026-09-20
 
 This is a minor release focused on the Codebelt.Coverlet.MTP fork with narrowed scope, enhanced coverage analysis, improved testing infrastructure, and build reliability improvements.
@@ -74,4 +84,5 @@ This is a minor release focused on the Codebelt.Coverlet.MTP fork with narrowed 
 - .vscode/settings.json configuration,
 - .devcontainer legacy configuration.
 
+[10.1.0]: https://github.com/codebeltnet/coverlet/compare/v10.0.1...v10.1.0
 [10.0.1]: https://github.com/codebeltnet/coverlet/compare/v10.0.0...v10.0.1
