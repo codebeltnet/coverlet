@@ -6,11 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ## [10.1.1] - 2026-10-20
 
-This is a patch release that fixes module unload mutex collisions between unrelated coverage sessions, with no new capabilities or changed public behavior beyond the fix.
+This is a patch release that fixes module unload mutex collisions between unrelated coverage sessions and updates the Microsoft runtime pins and the `System.Security.Cryptography.Pkcs` override used by coverlet.core, with no new capabilities.
+
+### Changed
+
+- Update the central Microsoft .NET 10 and .NET 9 runtime pins from 10.0.12 and 9.0.20 to 10.0.13 and 9.0.21,
+- Update the `System.Security.Cryptography.Pkcs` override in coverlet.core from 8.0.1 to 8.0.2.
 
 ### Fixed
 
-- Fix unrelated coverage sessions sharing the module unload mutex by naming it from the full hit file name, with regression coverage for the legacy assembly-prefix collision.
+- Fix unrelated coverage sessions sharing the module unload mutex by naming it from the full hit file name instead of the extension-stripped name, with regression coverage for the legacy assembly-prefix collision.
 
 ## [10.1.0] - 2026-09-27
 
