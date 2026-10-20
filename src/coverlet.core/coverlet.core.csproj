@@ -30,7 +30,7 @@
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" VersionOverride="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" VersionOverride="8.0.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="8.0.1" />
-    <PackageReference Include="System.Security.Cryptography.Pkcs" VersionOverride="8.0.1" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" VersionOverride="8.0.2" />
     <PackageReference Include="System.Text.Json" VersionOverride="8.0.6" />
   </ItemGroup>
 
