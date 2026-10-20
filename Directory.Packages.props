@@ -11,8 +11,8 @@
       versions are not uniform across packages. Test projects stay on the newest generation for every TFM because their
       tooling (Microsoft.CodeAnalysis, ReportGenerator.Core) already requires the 10.0.x packages.
     -->
-    <MicrosoftNet10RuntimeVersion>10.0.12</MicrosoftNet10RuntimeVersion>
-    <MicrosoftNet9RuntimeVersion>9.0.20</MicrosoftNet9RuntimeVersion>
+    <MicrosoftNet10RuntimeVersion>10.0.13</MicrosoftNet10RuntimeVersion>
+    <MicrosoftNet9RuntimeVersion>9.0.21</MicrosoftNet9RuntimeVersion>
     <MicrosoftNetRuntimeVersion>$(MicrosoftNet10RuntimeVersion)</MicrosoftNetRuntimeVersion>
     <MicrosoftNetRuntimeVersion Condition="'$(TargetFramework)' == 'net9.0' AND '$(IsTestProject)' != 'true'">$(MicrosoftNet9RuntimeVersion)</MicrosoftNetRuntimeVersion>
     <MicrosoftNETTestSdkVersion>18.10.1</MicrosoftNETTestSdkVersion>
