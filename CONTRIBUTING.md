@@ -24,7 +24,9 @@ dotnet pack src/coverlet.MTP/coverlet.MTP.csproj -c Release --no-build
 dotnet test -c Release --no-build
 ```
 
-The MTP package-validation tests consume the locally packed `Codebelt.Coverlet.MTP` package from `artifacts/package/release`, so pack before running `test/coverlet.MTP.validation.tests` directly.
+The MTP package-validation project automatically packs `Codebelt.Coverlet.MTP` when built locally, including builds started by Visual Studio Test Explorer. No manual packing or package-folder cleanup is required. Each configuration and test framework uses an isolated directory under `artifacts/validation`, so older packages in `artifacts/package` do not affect local validation. The first build takes longer because it builds the package for all supported frameworks; subsequent package builds reuse their build outputs.
+
+In GitHub Actions, automatic packing is disabled so validation consumes the downloaded release package from `artifacts/package/release`. Outside GitHub Actions, use `-p:PrepareValidationPackage=false` to validate an existing package from `artifacts/package/<configuration>` instead. That directory must contain exactly one `Codebelt.Coverlet.MTP.*.nupkg`. As usual, `dotnet test --no-build` reuses the package prepared by the previous build.
 
 ## Focused test runs
 
