@@ -62,13 +62,13 @@ public class HelpCommandTests
 
     if (!Directory.Exists(packagesPath))
     {
-      throw new DirectoryNotFoundException($"Package directory '{packagesPath}' not found. Rebuild the validation test project.");
+      throw new DirectoryNotFoundException($"Package directory '{packagesPath}' not found. Supply the existing Codebelt.Coverlet.MTP package in this directory, or rebuild the validation test project locally with -p:PrepareValidationPackage=true to prepare it automatically.");
     }
 
     List<string> files = Directory.GetFiles(packagesPath, filter).ToList();
     if (files.Count == 0)
     {
-      throw new InvalidOperationException($"Could not find any package using filter '{filter}' in folder '{Path.GetFullPath(packagesPath)}'. Rebuild the validation test project.");
+      throw new InvalidOperationException($"Could not find any package using filter '{filter}' in folder '{Path.GetFullPath(packagesPath)}'. Supply the existing Codebelt.Coverlet.MTP package in this directory, or rebuild the validation test project locally with -p:PrepareValidationPackage=true to prepare it automatically.");
     }
     else if (files.Count > 1)
     {
@@ -450,7 +450,7 @@ public class HelpCommandTests
     {
       throw new InvalidOperationException(
         $"Codebelt.Coverlet.MTP package not found in '{packagesPath}'.\n" +
-        "Rebuild the validation test project.");
+        "Supply the existing Codebelt.Coverlet.MTP package in this directory, or rebuild the validation test project locally with -p:PrepareValidationPackage=true to prepare it automatically.");
     }
   }
 
