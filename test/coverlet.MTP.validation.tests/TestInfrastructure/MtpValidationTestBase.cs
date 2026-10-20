@@ -30,8 +30,7 @@ public abstract class MtpValidationTestBase
 #endif
         RepoRoot = Path.GetFullPath(
             Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", ".."));
-        LocalPackagesPath = Path.Combine(
-            RepoRoot, "artifacts", "package", BuildConfiguration.ToLowerInvariant());
+        LocalPackagesPath = ValidationPackage.DirectoryPath;
     }
 
     // ── Package version ──────────────────────────────────────────────────────
@@ -45,14 +44,14 @@ public abstract class MtpValidationTestBase
         if (!Directory.Exists(LocalPackagesPath))
         {
             throw new DirectoryNotFoundException(
-                $"Local packages path '{LocalPackagesPath}' not found. Run 'dotnet pack' first.");
+                $"Local packages path '{LocalPackagesPath}' not found. Supply the existing Codebelt.Coverlet.MTP package in this directory, or rebuild the validation test project locally with -p:PrepareValidationPackage=true to prepare it automatically.");
         }
 
         string[] packages = Directory.GetFiles(LocalPackagesPath, "Codebelt.Coverlet.MTP.*.nupkg");
         if (packages.Length == 0)
         {
             throw new InvalidOperationException(
-                $"Could not find Codebelt.Coverlet.MTP package in '{LocalPackagesPath}'. Run 'dotnet pack' first.");
+                $"Could not find Codebelt.Coverlet.MTP package in '{LocalPackagesPath}'. Supply the existing Codebelt.Coverlet.MTP package in this directory, or rebuild the validation test project locally with -p:PrepareValidationPackage=true to prepare it automatically.");
         }
 
         if (packages.Length > 1)

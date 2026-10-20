@@ -11,4 +11,17 @@
     <VSTestTestCaseFilter></VSTestTestCaseFilter>
   </PropertyGroup>
 
+  <!-- Run for each real framework build, never for IDE design-time builds. -->
+  <Target Name="PrepareCoverletValidationPackage"
+          AfterTargets="Build"
+          Condition="'$(TargetFramework)' != '' and '$(DesignTimeBuild)' != 'true' and '$(PrepareValidationPackage)' == 'true'">
+    <ItemGroup>
+      <_PreviousValidationPackages Include="$(ValidationPackagePath)/Codebelt.Coverlet.MTP.*.nupkg;$(ValidationPackagePath)/Codebelt.Coverlet.MTP.*.snupkg" />
+    </ItemGroup>
+    <Delete Files="@(_PreviousValidationPackages)" />
+    <!-- A locally rebuilt package can keep its version; do not reuse the consumer's cached copy. -->
+    <RemoveDir Directories="$(TargetDir)TestProjects/BasicTestProject/.packages/codebelt.coverlet.mtp" />
+    <Exec WorkingDirectory="$(RepoRoot)"
+          Command="dotnet pack &quot;$(RepoRoot)src/coverlet.MTP/coverlet.MTP.csproj&quot; --configuration &quot;$(Configuration)&quot; --artifacts-path &quot;$(ValidationArtifactsPath)/build&quot; --output &quot;$(ValidationPackagePath)&quot; --nologo" />
+  </Target>
 </Project>
