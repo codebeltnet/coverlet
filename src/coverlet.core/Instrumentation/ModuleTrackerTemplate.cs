@@ -103,7 +103,9 @@ namespace Coverlet.Core.Instrumentation
       // The same module can be unloaded concurrently (different AppDomains, or ProcessExit racing an
       // in-proc-collector call). A global mutex serialises access; FlushHitFile is cleared inside the
       // lock so a waiting caller sees the updated value and skips a redundant write.
-      using var mutex = new Mutex(true, Path.GetFileNameWithoutExtension(HitsFilePath) + "_Mutex", out bool createdNew);
+      // Hit files have no extension. Preserve the full name, including the session GUID,
+      // so unrelated modules and runtimes never share a mutex through an assembly-name prefix.
+      using var mutex = new Mutex(true, Path.GetFileName(HitsFilePath) + "_Mutex", out bool createdNew);
       if (!createdNew)
       {
         mutex.WaitOne();

@@ -222,7 +222,7 @@ namespace Coverlet.Core.Tests.Instrumentation
       {
         using var ctx = new TrackerContext();
         using var mutex = new Mutex(
-              true, Path.GetFileNameWithoutExtension(ModuleTrackerTemplate.HitsFilePath) + "_Mutex", out bool createdNew);
+              true, Path.GetFileName(ModuleTrackerTemplate.HitsFilePath) + "_Mutex", out bool createdNew);
         Assert.True(createdNew);
 
         ModuleTrackerTemplate.HitsArray = [0, 1, 2, 3];
@@ -247,6 +247,42 @@ namespace Coverlet.Core.Tests.Instrumentation
         return 0;
       });
 
+    }
+
+    [Fact]
+    public void CoverageSessionDoesNotShareLegacyAssemblyPrefixMutex()
+    {
+      FunctionExecutor.Run(() =>
+      {
+        using var ctx = new TrackerContext();
+        string assemblyPrefix = "CoverageSession" + Guid.NewGuid().ToString("N");
+        ModuleTrackerTemplate.HitsFilePath = Path.Combine(Path.GetTempPath(), assemblyPrefix + ".Core_" + Guid.NewGuid());
+        string otherSessionHitsFilePath = Path.Combine(Path.GetTempPath(), assemblyPrefix + ".Data_" + Guid.NewGuid());
+
+        // Older collectors discard the last namespace segment and session GUID.
+        // A writer must not share that mutex with an unrelated coverage session.
+        using var otherSessionMutex = new Mutex(true, Path.GetFileNameWithoutExtension(otherSessionHitsFilePath) + "_Mutex", out bool createdNew);
+        Assert.True(createdNew);
+
+        ModuleTrackerTemplate.HitsArray = [1, 2, 3];
+        var unloadTask = Task.Run(() => ModuleTrackerTemplate.UnloadModule(null, null));
+        bool completedWhileOtherSessionOwnedMutex;
+        try
+        {
+#pragma warning disable xUnit1031 // Keep acquisition and release on the mutex-owning thread.
+          completedWhileOtherSessionOwnedMutex = unloadTask.Wait(TimeSpan.FromSeconds(5));
+#pragma warning restore xUnit1031 // Keep acquisition and release on the mutex-owning thread.
+        }
+        finally
+        {
+          otherSessionMutex.ReleaseMutex();
+        }
+
+        unloadTask.GetAwaiter().GetResult();
+        Assert.True(completedWhileOtherSessionOwnedMutex, "An unrelated coverage session blocked the writer.");
+        Assert.Equal(new[] { 1, 2, 3 }, ReadHitsFile());
+        return s_success;
+      });
     }
 
     [Fact]
