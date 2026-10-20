@@ -70,14 +70,14 @@ public class PackageLayoutTests : MtpValidationTestBase
     AssertDependency(dependencyGroups["netstandard2.0"], "System.Buffers", "4.6.1");
     AssertDependency(dependencyGroups["netstandard2.0"], "System.Memory", "4.6.3");
 
-    AssertDependency(dependencyGroups["net9.0"], "Microsoft.Extensions.Configuration", "9.0.20");
-    AssertDependency(dependencyGroups["net9.0"], "Microsoft.Extensions.Configuration.Json", "9.0.20");
-    AssertDependency(dependencyGroups["net9.0"], "Microsoft.Extensions.DependencyInjection", "9.0.20");
+    AssertDependency(dependencyGroups["net9.0"], "Microsoft.Extensions.Configuration", MtpPackageVersions.MicrosoftNet9Runtime);
+    AssertDependency(dependencyGroups["net9.0"], "Microsoft.Extensions.Configuration.Json", MtpPackageVersions.MicrosoftNet9Runtime);
+    AssertDependency(dependencyGroups["net9.0"], "Microsoft.Extensions.DependencyInjection", MtpPackageVersions.MicrosoftNet9Runtime);
     AssertDependency(dependencyGroups["net9.0"], "Microsoft.Testing.Platform", MtpPackageVersions.MicrosoftTestingPlatform);
 
-    AssertDependency(dependencyGroups["net10.0"], "Microsoft.Extensions.Configuration", "10.0.12");
-    AssertDependency(dependencyGroups["net10.0"], "Microsoft.Extensions.Configuration.Json", "10.0.12");
-    AssertDependency(dependencyGroups["net10.0"], "Microsoft.Extensions.DependencyInjection", "10.0.12");
+    AssertDependency(dependencyGroups["net10.0"], "Microsoft.Extensions.Configuration", MtpPackageVersions.MicrosoftNet10Runtime);
+    AssertDependency(dependencyGroups["net10.0"], "Microsoft.Extensions.Configuration.Json", MtpPackageVersions.MicrosoftNet10Runtime);
+    AssertDependency(dependencyGroups["net10.0"], "Microsoft.Extensions.DependencyInjection", MtpPackageVersions.MicrosoftNet10Runtime);
     AssertDependency(dependencyGroups["net10.0"], "Microsoft.Testing.Platform", MtpPackageVersions.MicrosoftTestingPlatform);
   }
 
