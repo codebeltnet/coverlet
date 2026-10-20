@@ -10,6 +10,14 @@
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <IsPackable>false</IsPackable>
+    <!-- Package inputs live outside this project, so always let MSBuild prepare them. -->
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+    <PrepareValidationPackage Condition="'$(PrepareValidationPackage)' == '' and '$(GITHUB_ACTIONS)' == 'true'">false</PrepareValidationPackage>
+    <PrepareValidationPackage Condition="'$(PrepareValidationPackage)' == ''">true</PrepareValidationPackage>
+    <!-- Isolate both frameworks from each other and from normal solution builds. -->
+    <ValidationArtifactsPath>$(RepoRoot)artifacts/validation/$(Configuration)/$(TargetFramework)</ValidationArtifactsPath>
+    <ValidationPackagePath Condition="'$(PrepareValidationPackage)' == 'true'">$(ValidationArtifactsPath)/packages</ValidationPackagePath>
+    <ValidationPackagePath Condition="'$(PrepareValidationPackage)' != 'true'">$(RepoRoot)artifacts/package/$(Configuration.ToLowerInvariant())</ValidationPackagePath>
     <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
     <!-- replace the xUnit.net native command line experience with the Microsoft Testing Platform command line experience -->
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
@@ -26,6 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <AssemblyMetadata Include="ValidationPackagePath" Value="$(ValidationPackagePath)" />
     <ProjectCapability Include="TestingPlatform" />
     <ProjectCapability Include="TestingPlatformApplication" />
   </ItemGroup>
