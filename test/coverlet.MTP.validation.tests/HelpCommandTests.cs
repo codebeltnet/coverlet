@@ -45,7 +45,7 @@ public class HelpCommandTests
 
     // Get repository root
     _repoRoot = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", ".."));
-    _localPackagesPath = Path.Combine(_repoRoot, "artifacts", "package", _buildConfiguration.ToLowerInvariant());
+    _localPackagesPath = ValidationPackage.DirectoryPath;
 
     _projectOutputPath = Path.Combine(_repoRoot, "artifacts", "bin", s_projectName, _buildConfiguration.ToLowerInvariant()); 
 
@@ -58,21 +58,21 @@ public class HelpCommandTests
 
   private protected static string GetPackageVersion(string filter)
   {
-    string packagesPath = TestUtils.GetPackagePath(TestUtils.GetAssemblyBuildConfiguration().ToString().ToLowerInvariant());
+    string packagesPath = ValidationPackage.DirectoryPath;
 
     if (!Directory.Exists(packagesPath))
     {
-      throw new DirectoryNotFoundException($"Package directory '{packagesPath}' not found, run 'dotnet pack' on repository root");
+      throw new DirectoryNotFoundException($"Package directory '{packagesPath}' not found. Rebuild the validation test project.");
     }
 
     List<string> files = Directory.GetFiles(packagesPath, filter).ToList();
     if (files.Count == 0)
     {
-      throw new InvalidOperationException($"Could not find any package using filter '{filter}' in folder '{Path.GetFullPath(packagesPath)}'. Make sure 'dotnet pack' was called.");
+      throw new InvalidOperationException($"Could not find any package using filter '{filter}' in folder '{Path.GetFullPath(packagesPath)}'. Rebuild the validation test project.");
     }
     else if (files.Count > 1)
     {
-      throw new InvalidOperationException($"Found more than one package using filter '{filter}' in folder '{Path.GetFullPath(packagesPath)}'. Make sure 'dotnet pack' was only called once.");
+      throw new InvalidOperationException($"Found more than one package using filter '{filter}' in folder '{Path.GetFullPath(packagesPath)}'. Expected exactly one.");
     }
     else
     {
@@ -442,8 +442,7 @@ public class HelpCommandTests
 
   private void EnsurePackagesBuilt()
   {
-    string packagesPath = TestUtils.GetPackagePath(
-      TestUtils.GetAssemblyBuildConfiguration().ToString().ToLowerInvariant());
+    string packagesPath = ValidationPackage.DirectoryPath;
 
     // Check for Codebelt.Coverlet.MTP
     string[] mtpPackages = Directory.GetFiles(packagesPath, "Codebelt.Coverlet.MTP.*.nupkg");
@@ -451,7 +450,7 @@ public class HelpCommandTests
     {
       throw new InvalidOperationException(
         $"Codebelt.Coverlet.MTP package not found in '{packagesPath}'.\n" +
-        $"Run: dotnet pack src/coverlet.MTP -c {_buildConfiguration}");
+        "Rebuild the validation test project.");
     }
   }
 
