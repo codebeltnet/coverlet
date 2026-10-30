@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Coverlet.Core.Abstractions;
 using Coverlet.Core.Helpers;
@@ -160,6 +161,26 @@ namespace Coverlet.Core.Tests.Instrumentation
 
       bool found = doc.Lines.Values.Any(l => l.Class == excludedType.FullName);
       Assert.False(found, "Class decorated with with exclude attribute should be excluded");
+
+      instrumenterTest.Directory.Delete(true);
+    }
+
+    [Fact]
+    public void TestInstrument_LocalFunction_IsNotExcludedByDefaultCompilerGeneratedAttribute()
+    {
+      // Regression test for https://github.com/coverlet-coverage/coverlet/issues/2045:
+      // local functions are compiled by Roslyn as regular methods decorated with
+      // [CompilerGeneratedAttribute]. Since that attribute is part of the default
+      // ExcludeByAttribute list, the local function body must still be instrumented
+      // rather than being entirely dropped from the coverage report.
+      InstrumenterTest instrumenterTest = CreateInstrumentor(attributesToIgnore: new string[] { nameof(CompilerGeneratedAttribute) });
+      InstrumenterResult result = instrumenterTest.Instrumenter.Instrument();
+
+      Coverlet.Core.Instrumentation.Document doc = result.Documents.Values.FirstOrDefault(d => Path.GetFileName(d.Path) == "Samples.cs");
+      Assert.NotNull(doc);
+
+      bool found = doc.Lines.Values.Any(l => l.Method.Contains("Throw"));
+      Assert.True(found, "Local function should still be instrumented even though CompilerGeneratedAttribute is in the exclude list");
 
       instrumenterTest.Directory.Delete(true);
     }
@@ -751,6 +772,29 @@ public class SampleClass
       Assert.NotNull(asm);
     }
 
+    [Theory]
+    [InlineData("11.0.0-test.1", "11.0.10-test.1")]
+    [InlineData("11.0.0", "11.0.2")]
+    public void TestInstrument_NetCoreSharedFrameworkResolver_SelectsMatchingVersion(string requestedVersion, string expectedDirectory)
+    {
+      string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+      Directory.CreateDirectory(tempDirectory);
+      try
+      {
+        foreach (string name in new[] { "10.0.99", "11.0.0-test.1", "11.0.0-test.2", "11.0.2", "11.0.10-test.1", "11.0.invalid" })
+        {
+          Directory.CreateDirectory(Path.Combine(tempDirectory, name));
+        }
+
+        string path = NetCoreSharedFrameworkResolver.GetSharedFrameworkPath(new DirectoryInfo(tempDirectory), NuGet.Versioning.NuGetVersion.Parse(requestedVersion));
+        Assert.Equal(Path.Combine(tempDirectory, expectedDirectory), path);
+      }
+      finally
+      {
+        Directory.Delete(tempDirectory, true);
+      }
+    }
+
     [Fact]
     public void TestInstrument_NetstandardAwareAssemblyResolver_SiblingRuntimeConfigCanResolveSharedFrameworkAssembly()
     {
@@ -762,17 +806,6 @@ public class SampleClass
 
         string runtimeVersion = new DirectoryInfo(Path.GetDirectoryName(typeof(object).Assembly.Location)!).Name;
         var runtimeAssemblyVersion = typeof(object).Assembly.GetName().Version;
-        string runtimeRootPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(typeof(object).Assembly.Location)!, "..", ".."));
-        string runtimeDirectory = Path.Combine(runtimeRootPath, "Microsoft.NETCore.App");
-        string majorVersion = $"{runtimeAssemblyVersion.Major}.{runtimeAssemblyVersion.Minor}.";
-
-        if (Directory.GetDirectories(runtimeDirectory, majorVersion + "*", SearchOption.TopDirectoryOnly)
-            .Select(Path.GetFileName)
-            .Any(name => !uint.TryParse(name[majorVersion.Length..], out _)))
-        {
-          return;
-        }
-
         string runtimeConfigFile = Path.Combine(tempDirectory, "testhost.runtimeconfig.json");
         File.WriteAllText(runtimeConfigFile,
             "{\n" +

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net9.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net10.0;net11.0</TargetFrameworks>
     <AssemblyTitle>Coverlet.MTP</AssemblyTitle>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -35,7 +35,7 @@
     <PackageProjectUrl>https://github.com/codebeltnet/coverlet</PackageProjectUrl>
     <PackageIcon>coverlet-icon.png</PackageIcon>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Description>Cross-platform code coverage for .NET with explicit TFM support and framework-aligned dependencies.</Description>
+    <Description>Cross-platform code coverage for .NET with explicit target framework support.</Description>
     <PackageTags>coverage;microsoft-testing-platform;code-coverage</PackageTags>
     <PackageReadmeFile>Coverlet.MTP.Integration.md</PackageReadmeFile>
     <PackageReleaseNotes>https://github.com/codebeltnet/coverlet/releases</PackageReleaseNotes>
@@ -55,7 +55,7 @@
     <PackageReference Include="MinVer" PrivateAssets="all" />
   </ItemGroup>
 
-  <!-- Directory.Packages.props resolves $(MicrosoftNetRuntimeVersion) per target framework (net10.0 -> 10.0.x, net9.0 -> 9.0.x). -->
+  <!-- Directory.Packages.props selects runtime package versions by target framework. -->
   <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
     <PackageReference Include="Microsoft.Extensions.Configuration" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
