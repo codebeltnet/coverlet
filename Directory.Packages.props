@@ -4,17 +4,10 @@
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <PropertyGroup>
-    <!--
-      Framework-aligned runtime package versions: shipping projects consume the Microsoft.Extensions.*/System.* packages
-      of their own .NET generation (net10.0 -> 10.0.x, net9.0 -> 9.0.x) so the package never carries newer generation
-      assets in an older TFM group. netstandard2.0 keeps explicit 8.0.x overrides in the project files because those
-      versions are not uniform across packages. Test projects stay on the newest generation for every TFM because their
-      tooling (Microsoft.CodeAnalysis, ReportGenerator.Core) already requires the 10.0.x packages.
-    -->
-    <MicrosoftNet10RuntimeVersion>10.0.13</MicrosoftNet10RuntimeVersion>
-    <MicrosoftNet9RuntimeVersion>9.0.21</MicrosoftNet9RuntimeVersion>
+    <MicrosoftNet10RuntimeVersion>10.0.14</MicrosoftNet10RuntimeVersion>
+    <MicrosoftNet11RuntimeVersion>11.0.0-rc.3.26522.148</MicrosoftNet11RuntimeVersion>
     <MicrosoftNetRuntimeVersion>$(MicrosoftNet10RuntimeVersion)</MicrosoftNetRuntimeVersion>
-    <MicrosoftNetRuntimeVersion Condition="'$(TargetFramework)' == 'net9.0' AND '$(IsTestProject)' != 'true'">$(MicrosoftNet9RuntimeVersion)</MicrosoftNetRuntimeVersion>
+    <MicrosoftNetRuntimeVersion Condition="'$(TargetFramework)' == 'net11.0'">$(MicrosoftNet11RuntimeVersion)</MicrosoftNetRuntimeVersion>
     <MicrosoftNETTestSdkVersion>18.10.1</MicrosoftNETTestSdkVersion>
     <MicrosoftTestingPlatformVersion>2.4.1</MicrosoftTestingPlatformVersion>
     <MoqVersion>4.20.72</MoqVersion>
@@ -24,14 +17,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="10.0.11" />
-    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="$(MicrosoftNetRuntimeVersion)" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="$(MicrosoftNetRuntimeVersion)" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="$(MicrosoftNetRuntimeVersion)" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftNetRuntimeVersion)" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftNetRuntimeVersion)" />
-    <PackageVersion Include="Microsoft.Extensions.FileSystemGlobbing" Version="$(MicrosoftNetRuntimeVersion)" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftNetRuntimeVersion)" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
     <PackageVersion Include="Microsoft.Testing.Extensions.AzureDevOpsReport" Version="$(MicrosoftTestingPlatformVersion)" />
     <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="$(MicrosoftTestingPlatformVersion)" />
@@ -46,14 +32,36 @@
     <PackageVersion Include="NuGet.Versioning" Version="$(NugetPackageVersion)" />
     <PackageVersion Include="ReportGenerator.Core" Version="5.5.11" />
     <PackageVersion Include="System.Buffers" Version="4.6.1" />
-    <PackageVersion Include="System.Collections.Immutable" Version="$(MicrosoftNetRuntimeVersion)" />
     <PackageVersion Include="System.Linq.Async" Version="7.0.1" />
     <PackageVersion Include="System.Memory" Version="4.6.3" />
-    <PackageVersion Include="System.Reflection.Metadata" Version="$(MicrosoftNetRuntimeVersion)" />
-    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="$(MicrosoftNetRuntimeVersion)" />
-    <PackageVersion Include="System.Text.Json" Version="$(MicrosoftNetRuntimeVersion)" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualstudioVersion)" />
     <PackageVersion Include="xunit.v3.mtp-v2" Version="$(XunitV3Version)" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0' Or '$(TargetFramework)' == 'netstandard2.0'">
+    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="$(MicrosoftNet10RuntimeVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="$(MicrosoftNet10RuntimeVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="$(MicrosoftNet10RuntimeVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftNet10RuntimeVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftNet10RuntimeVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.FileSystemGlobbing" Version="$(MicrosoftNet10RuntimeVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftNet10RuntimeVersion)" />
+    <PackageVersion Include="System.Collections.Immutable" Version="$(MicrosoftNet10RuntimeVersion)" />
+    <PackageVersion Include="System.Reflection.Metadata" Version="$(MicrosoftNet10RuntimeVersion)" />
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="$(MicrosoftNet10RuntimeVersion)" />
+    <PackageVersion Include="System.Text.Json" Version="$(MicrosoftNet10RuntimeVersion)" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net11.0'">
+    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="$(MicrosoftNet11RuntimeVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="$(MicrosoftNet11RuntimeVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="$(MicrosoftNet11RuntimeVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftNet11RuntimeVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftNet11RuntimeVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.FileSystemGlobbing" Version="$(MicrosoftNet11RuntimeVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftNet11RuntimeVersion)" />
+    <PackageVersion Include="System.Collections.Immutable" Version="$(MicrosoftNet11RuntimeVersion)" />
+    <PackageVersion Include="System.Reflection.Metadata" Version="$(MicrosoftNet11RuntimeVersion)" />
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="$(MicrosoftNet11RuntimeVersion)" />
+    <PackageVersion Include="System.Text.Json" Version="$(MicrosoftNet11RuntimeVersion)" />
   </ItemGroup>
 </Project>
