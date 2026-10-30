@@ -4,9 +4,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [vNext] - 2026-10-30
+## [11.0.0] - 2026-11-10
 
-This is a patch release that makes the MTP package-validation tests prepare their own Codebelt.Coverlet.MTP package during local builds, including Visual Studio Test Explorer runs, with no runtime or package behavior changes.
+This release adds .NET 11 support, removes the dedicated .NET 9 target, and makes the MTP package-validation tests prepare their own Codebelt.Coverlet.MTP package during local builds, including Visual Studio Test Explorer runs.
 
 ### Added
 
@@ -14,6 +14,7 @@ This is a patch release that makes the MTP package-validation tests prepare thei
 
 ### Changed
 
+- Target .NET 10 and .NET 11 alongside .NET Standard 2.0, removing the dedicated .NET 9 target,
 - Change the validation tests to read the package folder from MSBuild metadata instead of a hard-coded `artifacts/package/<configuration>` path, with missing-package guidance that points to `-p:PrepareValidationPackage=true` or an existing package,
 - Disable automatic package preparation in GitHub Actions so validation consumes the downloaded release package, while allowing opt-out outside GitHub Actions with `-p:PrepareValidationPackage=false`,
 - Document the automatic packing behavior and opt-out in `CONTRIBUTING.md`, replacing the manual `dotnet pack` step.
