@@ -8,15 +8,15 @@
     <MicrosoftNet11RuntimeVersion>11.0.0-rc.3.26522.148</MicrosoftNet11RuntimeVersion>
     <MicrosoftNetRuntimeVersion>$(MicrosoftNet10RuntimeVersion)</MicrosoftNetRuntimeVersion>
     <MicrosoftNetRuntimeVersion Condition="'$(TargetFramework)' == 'net11.0'">$(MicrosoftNet11RuntimeVersion)</MicrosoftNetRuntimeVersion>
-    <MicrosoftNETTestSdkVersion>18.10.1</MicrosoftNETTestSdkVersion>
-    <MicrosoftTestingPlatformVersion>2.4.1</MicrosoftTestingPlatformVersion>
-    <MoqVersion>4.20.72</MoqVersion>
-    <NugetPackageVersion>7.6.0</NugetPackageVersion>
-    <XunitV3Version>4.0.1</XunitV3Version>
-    <XunitRunnerVisualstudioVersion>4.0.0</XunitRunnerVisualstudioVersion>
+    <MicrosoftNETTestSdkVersion>18.11.0</MicrosoftNETTestSdkVersion>
+    <MicrosoftTestingPlatformVersion>2.5.1</MicrosoftTestingPlatformVersion>
+    <MoqVersion>4.21.0</MoqVersion>
+    <NugetPackageVersion>7.9.0</NugetPackageVersion>
+    <XunitV3Version>4.0.2</XunitV3Version>
+    <XunitRunnerVisualstudioVersion>4.0.1</XunitRunnerVisualstudioVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="10.0.11" />
+    <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="10.1.1" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
     <PackageVersion Include="Microsoft.Testing.Extensions.AzureDevOpsReport" Version="$(MicrosoftTestingPlatformVersion)" />
