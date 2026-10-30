@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [vNext] - 2026-10-30
+
+This is a patch release that makes the MTP package-validation tests prepare their own Codebelt.Coverlet.MTP package during local builds, including Visual Studio Test Explorer runs, with no runtime or package behavior changes.
+
+### Added
+
+- Add automatic preparation of the Codebelt.Coverlet.MTP package for the MTP package-validation tests during local builds, skipped for IDE design-time builds, with isolated output under `artifacts/validation` per configuration and framework.
+
+### Changed
+
+- Change the validation tests to read the package folder from MSBuild metadata instead of a hard-coded `artifacts/package/<configuration>` path, with missing-package guidance that points to `-p:PrepareValidationPackage=true` or an existing package,
+- Disable automatic package preparation in GitHub Actions so validation consumes the downloaded release package, while allowing opt-out outside GitHub Actions with `-p:PrepareValidationPackage=false`,
+- Document the automatic packing behavior and opt-out in `CONTRIBUTING.md`, replacing the manual `dotnet pack` step.
+
 ## [10.1.1] - 2026-10-20
 
 This is a patch release that fixes module unload mutex collisions between unrelated coverage sessions and updates the Microsoft runtime pins and the `System.Security.Cryptography.Pkcs` override used by coverlet.core, with no new capabilities.
@@ -97,6 +111,7 @@ This is a minor release focused on the Codebelt.Coverlet.MTP fork with narrowed 
 - .vscode/settings.json configuration,
 - .devcontainer legacy configuration.
 
+[10.1.2]: https://github.com/codebeltnet/coverlet/compare/v10.1.1...vNext
 [10.1.1]: https://github.com/codebeltnet/coverlet/compare/v10.1.0...v10.1.1
 [10.1.0]: https://github.com/codebeltnet/coverlet/compare/v10.0.1...v10.1.0
 [10.0.1]: https://github.com/codebeltnet/coverlet/compare/v10.0.0...v10.0.1
