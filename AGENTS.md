@@ -21,7 +21,7 @@ When synchronizing from `coverlet-coverage/coverlet`, keep the sync selective:
 
 3. Port only changes that apply to the retained package surface: `src\coverlet.core`, `src\coverlet.MTP`, and the directly related tests.
 4. Do not reintroduce upstream surfaces removed by this fork, including legacy console, collector, msbuild packages, legacy Azure Pipelines, broad upstream documentation, or `version.json`.
-5. Preserve `Codebelt.Coverlet.MTP` package identity, `Coverlet.MTP` assembly identity, and the multi-targeted `netstandard2.0;net9.0;net10.0` layout.
+5. Preserve `Codebelt.Coverlet.MTP` package identity, `Coverlet.MTP` assembly identity, and the multi-targeted `netstandard2.0;net10.0;net11.0` layout.
 6. Keep versioning on MinVer `v*` tags and the existing release workflow guards. Do not restore upstream Nerdbank.GitVersioning files.
 7. Adapt release notes to this fork's root `CHANGELOG.md`; describe only changes that were actually ported.
 8. If an upstream tag was accidentally fetched and points at an upstream commit, delete that local tag before release preparation:
