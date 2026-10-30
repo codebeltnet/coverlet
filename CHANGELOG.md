@@ -6,18 +6,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ## [11.0.0] - 2026-11-10
 
-This release adds .NET 11 support, removes the dedicated .NET 9 target, and makes the MTP package-validation tests prepare their own Codebelt.Coverlet.MTP package during local builds, including Visual Studio Test Explorer runs.
+This major release adds .NET 11 support, removes the dedicated .NET 9 target, and incorporates upstream improvements to branch coverage and local-function instrumentation. MTP package-validation tests also prepare their own Codebelt.Coverlet.MTP package during local builds, including Visual Studio Test Explorer runs.
 
 ### Added
 
+- Add control-flow analysis that identifies branches unreachable from method entry, including through exception handlers, with compatibility for existing serialized instrumentation state,
+- Add regression coverage for MTP central configuration files, report formats, coverage thresholds, shared-framework resolution, and branch reachability,
 - Add automatic preparation of the Codebelt.Coverlet.MTP package for the MTP package-validation tests during local builds, skipped for IDE design-time builds, with isolated output under `artifacts/validation` per configuration and framework.
 
 ### Changed
 
-- Target .NET 10 and .NET 11 alongside .NET Standard 2.0, removing the dedicated .NET 9 target,
+- Target .NET 10 and .NET 11 alongside .NET Standard 2.0, with runtime dependency versions selected per target framework,
+- Exclude unreachable branches from branch coverage totals and from Cobertura, LCOV, and OpenCover branch details,
+- Update Microsoft Testing Platform to 2.5.1, Microsoft.NET.Test.Sdk to 18.11.0, xunit.v3.mtp-v2 to 4.0.2, xunit.runner.visualstudio to 4.0.1, Moq to 4.21.0, and LinqKit.Microsoft.EntityFrameworkCore to 10.1.1,
+- Update NuGet.Packaging and NuGet.Versioning to 7.9.0, retaining a NuGet.Versioning 6.14.3 override for .NET Standard 2.0,
 - Change the validation tests to read the package folder from MSBuild metadata instead of a hard-coded `artifacts/package/<configuration>` path, with missing-package guidance that points to `-p:PrepareValidationPackage=true` or an existing package,
 - Disable automatic package preparation in GitHub Actions so validation consumes the downloaded release package, while allowing opt-out outside GitHub Actions with `-p:PrepareValidationPackage=false`,
 - Document the automatic packing behavior and opt-out in `CONTRIBUTING.md`, replacing the manual `dotnet pack` step.
+
+### Removed
+
+- Remove the dedicated .NET 9 target,
+- Remove the direct System.Reflection.Metadata reference from the core test project, which uses the framework-provided assembly.
+
+### Fixed
+
+- Instrument local functions when CompilerGeneratedAttribute or GeneratedCodeAttribute is excluded, while continuing to honor other configured exclusion attributes,
+- Resolve shared-framework assemblies when runtime directory names contain version suffixes,
+- Align pattern-matching branch assertions with the selected SDK's compiled output.
 
 ## [10.1.1] - 2026-10-20
 
@@ -112,7 +128,7 @@ This is a minor release focused on the Codebelt.Coverlet.MTP fork with narrowed 
 - .vscode/settings.json configuration,
 - .devcontainer legacy configuration.
 
-[10.1.2]: https://github.com/codebeltnet/coverlet/compare/v10.1.1...vNext
+[11.0.0]: https://github.com/codebeltnet/coverlet/compare/v10.1.1...v11.0.0
 [10.1.1]: https://github.com/codebeltnet/coverlet/compare/v10.1.0...v10.1.1
 [10.1.0]: https://github.com/codebeltnet/coverlet/compare/v10.0.1...v10.1.0
 [10.0.1]: https://github.com/codebeltnet/coverlet/compare/v10.0.0...v10.0.1
