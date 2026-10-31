@@ -89,6 +89,8 @@ See [Coverlet.MTP.Integration.md](Documentation/Coverlet.MTP.Integration.md) for
 
 This fork is based on [coverlet-coverage/coverlet](https://github.com/coverlet-coverage/coverlet). The intent is not to replace Coverlet or rewrite its instrumentation internals; the fork exists to provide explicit target-framework support and NuGet dependency groups for the Microsoft Testing Platform package.
 
+See [UPSTREAM.md](UPSTREAM.md) for the dated synchronization history, source commits, validation results, omitted changes, and intentional differences from upstream. Release outcomes are summarized in [CHANGELOG.md](CHANGELOG.md).
+
 For Coverlet drivers outside this repository's scope, such as the console tool, VSTest collector, or MSBuild integration, use the upstream Coverlet packages and documentation.
 
 ## License and notices
