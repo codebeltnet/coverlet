@@ -48,8 +48,8 @@ Example test project:
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="xunit.v3.mtp-v2" Version="4.0.1" />
-    <PackageReference Include="Microsoft.Testing.Platform" Version="2.4.1" />
+    <PackageReference Include="xunit.v3.mtp-v2" Version="4.0.2" />
+    <PackageReference Include="Microsoft.Testing.Platform" Version="2.5.1" />
     <PackageReference Include="Codebelt.Coverlet.MTP" Version="*" />
   </ItemGroup>
 </Project>
