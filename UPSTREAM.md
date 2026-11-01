@@ -13,8 +13,8 @@ The compatibility goal is to preserve upstream behavior within the retained surf
 | Latest sync operation | 2026-11-01; normal upstream merge preserving the existing Codebelt tree |
 | Codebelt baseline | [`6e72c0c11523bf3d6baf3ca25c2a457ce547674e`](https://github.com/codebeltnet/coverlet/commit/6e72c0c11523bf3d6baf3ca25c2a457ce547674e), integrated by [PR #6](https://github.com/codebeltnet/coverlet/pull/6) on 2026-11-01 |
 | Upstream ancestry merge | [`d587f8ca285f0bf147fb933e14ed48dfff8a7490`](https://github.com/codebeltnet/coverlet/commit/d587f8ca285f0bf147fb933e14ed48dfff8a7490); first parent is the Codebelt baseline, second parent is the reviewed upstream tip |
-| Integration state at verification | Ancestry merge committed on the synchronization branch; destination integration and new CI pending. The 11.0.0 release entry remains a draft. |
-| Validation | The ancestry merge has the exact baseline tree; upstream-side behind count is zero on the sync branch. The baseline's [CI run 41232211145](https://github.com/codebeltnet/coverlet/actions/runs/41232211145) passed all retained test/package jobs. Current-operation validation is recorded below. |
+| Destination integration | [PR #7](https://github.com/codebeltnet/coverlet/pull/7) into `codebeltnet/coverlet:master` using a merge commit; its merge record supplies the authoritative destination commit and integration state. The 11.0.0 release entry remains a draft. |
+| Validation | [CI run 41267824916](https://github.com/codebeltnet/coverlet/actions/runs/41267824916) at `1ddc5ab8bb25e437ebd3207769023e88c4a035e5` passed build, release-version guard, all nine test jobs, packing, and all six package-validation jobs across .NET 10/11 and Linux, Windows, and macOS. Publication was skipped. The final documentation follow-up is also gated by the checks on PR #7. |
 
 ## Original marker and release tags
 
@@ -59,12 +59,12 @@ Normal merge [`d587f8ca285f0bf147fb933e14ed48dfff8a7490`](https://github.com/cod
 | [`23578d4`, #2030](https://github.com/coverlet-coverage/coverlet/commit/23578d4), [`d212822`, #2032](https://github.com/coverlet-coverage/coverlet/commit/d212822), [`c6d3894`, #2033](https://github.com/coverlet-coverage/coverlet/commit/c6d3894) | Already present: MTP configuration selection, shared-framework fallback, and async exclusion regression coverage, with Codebelt resolver and test-host adaptations retained. |
 | [`10a8051`, #2034](https://github.com/coverlet-coverage/coverlet/commit/10a8051), [`be3d696`, #2035](https://github.com/coverlet-coverage/coverlet/commit/be3d696) | Exclude upstream release/versioning files; retain MinVer, Codebelt release guards, root changelog, and focused documentation. |
 | [`8b7654e`](https://github.com/coverlet-coverage/coverlet/commit/8b7654e) | Exclude upstream issue-template edits, as in the earlier selective review. |
-| [`61e3350`, #2038](https://github.com/coverlet-coverage/coverlet/commit/61e3350) | Already present: central config-file and OpenCover tests. Retain Codebelt package preparation and test TFMs; omit the additional BCL compatibility reference because these tests target .NET 10/11. |
+| [`61e3350`, #2038](https://github.com/coverlet-coverage/coverlet/commit/61e3350) | Already present: central config-file and OpenCover tests. Retain Codebelt package preparation and test TFMs. |
 | [`3142be5`, #2044](https://github.com/coverlet-coverage/coverlet/commit/3142be5) | Already present: Moq 4.21.0. |
 | [`b330a1f`, #2043](https://github.com/coverlet-coverage/coverlet/commit/b330a1f), [`45e98f9`, #2039](https://github.com/coverlet-coverage/coverlet/commit/45e98f9) | Exclude SBOM and upstream CodeQL tooling outside the retained fork surface. |
 | [`ecd6fd5`, #2046](https://github.com/coverlet-coverage/coverlet/commit/ecd6fd5) | Already present: local-function instrumentation fix and regression test. |
 | [`221483a`, #2049](https://github.com/coverlet-coverage/coverlet/commit/221483a) | Exclude documentation for the removed console/global-tool driver. |
-| [`710f301`, #2050](https://github.com/coverlet-coverage/coverlet/commit/710f301) | Applicable updates already adapted; preserve per-TFM runtime pins and .NET Standard overrides. Exclude removed drivers, benchmarks, and pipeline dependencies. |
+| [`710f301`, #2050](https://github.com/coverlet-coverage/coverlet/commit/710f301) | Applicable updates already adapted; preserve per-TFM runtime pins and .NET Standard overrides. Exclude removed drivers, benchmarks, and pipeline dependencies; omit the additional BCL compatibility reference in validation tests because these target .NET 10/11. |
 | [`a924cc3`](https://github.com/coverlet-coverage/coverlet/commit/a924cc3) | Already present: validation-project PKCS reference; remove the duplicate produced by automatic merging. |
 | [`d9e4357`, #2051](https://github.com/coverlet-coverage/coverlet/commit/d9e4357) | Already present: threshold/report diagnostics and resolver tests. |
 | [`b5ba919`, #2055](https://github.com/coverlet-coverage/coverlet/commit/b5ba919) | Exclude legacy configurations and target-specific test dependency overrides; retain the already-adapted .NET Standard NuGet.Versioning 6.14.3 override and current test dependencies. |
@@ -78,7 +78,18 @@ The maintainer authorized completing this downstream-only workflow after the mer
 
 Local validation on Windows used the repository SDK `11.0.100-rc.3.26522.148`. `dotnet build coverlet.slnx -c Release -p:PrepareValidationPackage=false` passed with zero warnings/errors, and `dotnet pack src/coverlet.MTP/coverlet.MTP.csproj -c Release --no-build` succeeded. The resulting `Codebelt.Coverlet.MTP.10.1.2-alpha.0.3.nupkg` has the retained assembly/discovery identity, three TFM/dependency groups, .NET 10/11 runtime pins, and .NET Standard compatibility overrides; no removed driver assets returned. MinVer uses the existing `v10.1.1` boundary and produces a prerelease version, not its `0.0.0-alpha` fallback. All local tag names and targets were compared with the pre-operation snapshot and are unchanged.
 
-Approved local test commands use `dotnet test test/<project>/<project>.csproj -c Release -f <net10.0|net11.0> --no-build -p:PrepareValidationPackage=false -- --report-trx --report-trx-filename <project>.<framework>.trx`. Core tests passed on each framework (369 passed, 9 skipped); coverage tests passed on each (98 passed, none skipped); MTP tests passed on each (433 passed, 7 skipped). Package-validation tests and the fork's Linux/Windows/macOS PR CI are still in progress or pending; their results and the destination integration will be recorded before completion. .NET Standard 2.0 was built and packed, not executed as a test target. No release or package publication was performed.
+Approved local test commands use `dotnet test test/<project>/<project>.csproj -c Release -f <net10.0|net11.0> --no-build -p:PrepareValidationPackage=false -- --report-trx --report-trx-filename <project>.<framework>.trx`.
+
+| Project | .NET 10 | .NET 11 |
+| --- | --- | --- |
+| `coverlet.core.tests` | 369 passed, 9 skipped | 369 passed, 9 skipped |
+| `coverlet.core.coverage.tests` | 98 passed, none skipped | 98 passed, none skipped |
+| `coverlet.MTP.tests` | 433 passed, 7 skipped | 433 passed, 7 skipped |
+| `coverlet.MTP.validation.tests` | 45 passed, none skipped | 45 passed, none skipped on isolated full rerun |
+
+The initial concurrent .NET 10/11 package-validation runs had one .NET 11 restore failure in `ConfigurationFile_IncludeFilters_CanBeConfigured` (44 passed, 1 failed). The unchanged [test harness](test/coverlet.MTP.validation.tests/TestInfrastructure/MtpValidationTestBase.cs) recreates solution directories under a configuration/test name shared by both frameworks; one run can delete files used by the other. After the .NET 10 run completed, a full .NET 11 rerun passed all 45 tests without any code, dependency, or assertion changes. Run package-validation framework legs sequentially within a worktree, as CI already does by using separate matrix jobs. .NET Standard 2.0 was built and packed, not executed as a test target. No release or package publication was performed.
+
+Cross-platform validation: [CI run 41267824916](https://github.com/codebeltnet/coverlet/actions/runs/41267824916), source `1ddc5ab8bb25e437ebd3207769023e88c4a035e5`, completed successfully on 2026-11-01. All 18 validation/build/package jobs succeeded; `publish-nuget` was skipped for the PR. This verifies the retained tests and packaged consumer behavior on .NET 10/11 across Linux, Windows, and macOS. A documentation-only follow-up records these outcomes and remains subject to the same PR checks. Integration is through [PR #7](https://github.com/codebeltnet/coverlet/pull/7) into this fork's `master` using a merge commit; that PR records the actual destination commit and merged state. The reviewed tip is an ancestor of the PR branch, and GitHub's comparison reports zero commits behind upstream. Destination ancestry is checked again after integration. No production behavior, dependency, test assertion, or release tag was changed by this synchronization.
 
 ### 2026-10-30: selective core and MTP update
 
