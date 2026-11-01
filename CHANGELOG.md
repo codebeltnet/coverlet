@@ -17,6 +17,7 @@ This major release adds .NET 11 support, removes the dedicated .NET 9 target, an
 ### Changed
 
 - Target .NET 10 and .NET 11 alongside .NET Standard 2.0, with runtime dependency versions selected per target framework,
+- Preserve reviewed upstream history through merge ancestry while retaining selective Codebelt file integration; the 2026-11-01 synchronization through `2e0a852` changes no production code, dependencies, or package layout,
 - Exclude unreachable branches from branch coverage totals and from Cobertura, LCOV, and OpenCover branch details,
 - Update Microsoft Testing Platform to 2.5.1, Microsoft.NET.Test.Sdk to 18.11.0, xunit.v3.mtp-v2 to 4.0.2, xunit.runner.visualstudio to 4.0.1, Moq to 4.21.0, and LinqKit.Microsoft.EntityFrameworkCore to 10.1.1,
 - Update NuGet.Packaging and NuGet.Versioning to 7.9.0, retaining a NuGet.Versioning 6.14.3 override for .NET Standard 2.0,

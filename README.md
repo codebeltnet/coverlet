@@ -6,6 +6,8 @@ Cross-platform code coverage for .NET with explicit target framework support.
 
 `Codebelt.Coverlet.MTP` is a deliberately narrow Codebelt-maintained fork of [Coverlet](https://github.com/coverlet-coverage/coverlet) for Microsoft Testing Platform integration. Coverlet remains the upstream project; this repository keeps the Coverlet engine and MTP integration recognizable while focusing package identity, target frameworks, dependency groups, and CI/CD on the Codebelt-maintained MTP package.
 
+Reviewed upstream history is retained through [`2e0a852`](https://github.com/coverlet-coverage/coverlet/commit/2e0a852d3a0d9669d9c19445e366c69ccaaf6424) (2026-10-27). The [synchronization record](UPSTREAM.md) explains the adopted fixes, intentional Codebelt differences, and validation.
+
 ## Scope
 
 This repository produces one public NuGet package: `Codebelt.Coverlet.MTP`. It preserves the implementation assembly name and namespace used by the MTP extension (`coverlet.MTP.dll`, `Coverlet.MTP`, and `Coverlet.MTP.TestingPlatformBuilderHook`) so existing Microsoft Testing Platform discovery remains compatible.
