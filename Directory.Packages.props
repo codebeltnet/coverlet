@@ -9,7 +9,7 @@
     <MicrosoftNetRuntimeVersion>$(MicrosoftNet10RuntimeVersion)</MicrosoftNetRuntimeVersion>
     <MicrosoftNetRuntimeVersion Condition="'$(TargetFramework)' == 'net11.0'">$(MicrosoftNet11RuntimeVersion)</MicrosoftNetRuntimeVersion>
     <MicrosoftNETTestSdkVersion>18.11.0</MicrosoftNETTestSdkVersion>
-    <MicrosoftTestingPlatformVersion>2.5.1</MicrosoftTestingPlatformVersion>
+    <MicrosoftTestingPlatformVersion>2.5.2</MicrosoftTestingPlatformVersion>
     <MoqVersion>4.21.0</MoqVersion>
     <NugetPackageVersion>7.9.0</NugetPackageVersion>
     <XunitV3Version>4.0.2</XunitV3Version>
