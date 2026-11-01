@@ -38,11 +38,11 @@ namespace Coverlet.Tests.Utils
 
     public static string GetAssemblyTargetFramework()
     {
-#if NET9_0
-      return "net9.0";
-#endif
 #if NET10_0
       return "net10.0";
+#endif
+#if NET11_0
+      return "net11.0";
 #endif
       throw new NotSupportedException($"Build configuration not supported");
     }

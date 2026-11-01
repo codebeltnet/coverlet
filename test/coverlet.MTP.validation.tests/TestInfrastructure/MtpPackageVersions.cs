@@ -12,7 +12,7 @@ namespace Coverlet.MTP.validation.tests;
 /// </summary>
 internal static class MtpPackageVersions
 {
-    private static readonly Lazy<(string MicrosoftTestingPlatform, string XunitV3, string MicrosoftNet9Runtime, string MicrosoftNet10Runtime)> s_versions =
+    private static readonly Lazy<(string MicrosoftTestingPlatform, string XunitV3, string MicrosoftNet10Runtime, string MicrosoftNet11Runtime)> s_versions =
         new(ReadVersionsFromProps);
 
     /// <summary>Gets the value of <c>MicrosoftTestingPlatformVersion</c> from <c>Directory.Packages.props</c>.</summary>
@@ -21,13 +21,13 @@ internal static class MtpPackageVersions
     /// <summary>Gets the value of <c>XunitV3Version</c> from <c>Directory.Packages.props</c>.</summary>
     internal static string XunitV3 => s_versions.Value.XunitV3;
 
-    /// <summary>Gets the value of <c>MicrosoftNet9RuntimeVersion</c> from <c>Directory.Packages.props</c>.</summary>
-    internal static string MicrosoftNet9Runtime => s_versions.Value.MicrosoftNet9Runtime;
-
     /// <summary>Gets the value of <c>MicrosoftNet10RuntimeVersion</c> from <c>Directory.Packages.props</c>.</summary>
     internal static string MicrosoftNet10Runtime => s_versions.Value.MicrosoftNet10Runtime;
 
-    private static (string MicrosoftTestingPlatform, string XunitV3, string MicrosoftNet9Runtime, string MicrosoftNet10Runtime) ReadVersionsFromProps()
+    /// <summary>Gets the value of <c>MicrosoftNet11RuntimeVersion</c> from <c>Directory.Packages.props</c>.</summary>
+    internal static string MicrosoftNet11Runtime => s_versions.Value.MicrosoftNet11Runtime;
+
+    private static (string MicrosoftTestingPlatform, string XunitV3, string MicrosoftNet10Runtime, string MicrosoftNet11Runtime) ReadVersionsFromProps()
     {
         string? dir = AppContext.BaseDirectory;
         while (!string.IsNullOrEmpty(dir))
@@ -50,15 +50,15 @@ internal static class MtpPackageVersions
                     ?? throw new InvalidOperationException(
                         $"Property 'XunitV3Version' not found in '{candidate}'.");
 
-                string net9Runtime = GetProp("MicrosoftNet9RuntimeVersion")
-                    ?? throw new InvalidOperationException(
-                        $"Property 'MicrosoftNet9RuntimeVersion' not found in '{candidate}'.");
-
                 string net10Runtime = GetProp("MicrosoftNet10RuntimeVersion")
                     ?? throw new InvalidOperationException(
                         $"Property 'MicrosoftNet10RuntimeVersion' not found in '{candidate}'.");
 
-                return (mtp, xunit, net9Runtime, net10Runtime);
+                string net11Runtime = GetProp("MicrosoftNet11RuntimeVersion")
+                    ?? throw new InvalidOperationException(
+                        $"Property 'MicrosoftNet11RuntimeVersion' not found in '{candidate}'.");
+
+                return (mtp, xunit, net10Runtime, net11Runtime);
             }
 
             dir = Path.GetDirectoryName(dir);

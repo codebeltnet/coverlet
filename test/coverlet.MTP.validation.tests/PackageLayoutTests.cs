@@ -9,7 +9,7 @@ namespace Coverlet.MTP.validation.tests;
 [Collection(nameof(MtpValidationTests))]
 public class PackageLayoutTests : MtpValidationTestBase
 {
-  private static readonly string[] s_supportedTfms = ["netstandard2.0", "net9.0", "net10.0"];
+  private static readonly string[] s_supportedTfms = ["netstandard2.0", "net10.0", "net11.0"];
 
   [Fact]
   public void PackageContainsOnlySupportedFrameworkAssets()
@@ -40,6 +40,7 @@ public class PackageLayoutTests : MtpValidationTestBase
     Assert.Contains("lib/netstandard2.0/System.Text.Json.dll", files);
 
     Assert.DoesNotContain(files, file => file.Contains("net8.0", StringComparison.OrdinalIgnoreCase));
+    Assert.DoesNotContain(files, file => file.Contains("net9.0", StringComparison.OrdinalIgnoreCase));
     Assert.DoesNotContain(files, file => file.Contains("coverlet.console", StringComparison.OrdinalIgnoreCase));
     Assert.DoesNotContain(files, file => file.Contains("coverlet.collector", StringComparison.OrdinalIgnoreCase));
     Assert.DoesNotContain(files, file => file.Contains("coverlet.msbuild", StringComparison.OrdinalIgnoreCase));
@@ -70,10 +71,10 @@ public class PackageLayoutTests : MtpValidationTestBase
     AssertDependency(dependencyGroups["netstandard2.0"], "System.Buffers", "4.6.1");
     AssertDependency(dependencyGroups["netstandard2.0"], "System.Memory", "4.6.3");
 
-    AssertDependency(dependencyGroups["net9.0"], "Microsoft.Extensions.Configuration", MtpPackageVersions.MicrosoftNet9Runtime);
-    AssertDependency(dependencyGroups["net9.0"], "Microsoft.Extensions.Configuration.Json", MtpPackageVersions.MicrosoftNet9Runtime);
-    AssertDependency(dependencyGroups["net9.0"], "Microsoft.Extensions.DependencyInjection", MtpPackageVersions.MicrosoftNet9Runtime);
-    AssertDependency(dependencyGroups["net9.0"], "Microsoft.Testing.Platform", MtpPackageVersions.MicrosoftTestingPlatform);
+    AssertDependency(dependencyGroups["net11.0"], "Microsoft.Extensions.Configuration", MtpPackageVersions.MicrosoftNet11Runtime);
+    AssertDependency(dependencyGroups["net11.0"], "Microsoft.Extensions.Configuration.Json", MtpPackageVersions.MicrosoftNet11Runtime);
+    AssertDependency(dependencyGroups["net11.0"], "Microsoft.Extensions.DependencyInjection", MtpPackageVersions.MicrosoftNet11Runtime);
+    AssertDependency(dependencyGroups["net11.0"], "Microsoft.Testing.Platform", MtpPackageVersions.MicrosoftTestingPlatform);
 
     AssertDependency(dependencyGroups["net10.0"], "Microsoft.Extensions.Configuration", MtpPackageVersions.MicrosoftNet10Runtime);
     AssertDependency(dependencyGroups["net10.0"], "Microsoft.Extensions.Configuration.Json", MtpPackageVersions.MicrosoftNet10Runtime);

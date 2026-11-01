@@ -15,8 +15,8 @@ More information is available here:
 This package provides explicit dependency groups for:
 
 - `netstandard2.0`
-- `net9.0`
 - `net10.0`
+- `net11.0`
 
 ## Quick Start
 
@@ -641,6 +641,6 @@ dotnet test --coverlet --diagnostic --diagnostic-verbosity Trace
 
 ## Requirements
 
-- .NET 9.0 SDK or newer for `net9.0` projects; .NET 10.0 SDK or newer for `net10.0` projects
+- .NET 10.0 SDK or newer for `net10.0` projects; .NET 11.0 SDK or newer for `net11.0` projects
 - Microsoft.Testing.Platform 2.0.0 or newer
 - Test framework with MTP support (e.g., xUnit v3 (xunit.v3.mtp-v2), MSTest v3, NUnit with MTP adapter)

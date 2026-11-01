@@ -478,10 +478,7 @@ namespace Coverlet.Core.Instrumentation
             {
               var semVersion = NuGetVersion.Parse(frameworkVersion);
               var directory = new DirectoryInfo(Path.Combine(runtimeRootPath, frameworkName));
-              string majorVersion = $"{semVersion.Major}.{semVersion.Minor}.";
-              uint latestVersion = directory.GetDirectories().Where(x => x.Name.StartsWith(majorVersion))
-                  .Select(x => Convert.ToUInt32(x.Name.Substring(majorVersion.Length))).Max();
-              string resolvedPath = Directory.GetDirectories(directory.FullName, majorVersion + $"{latestVersion}*", SearchOption.TopDirectoryOnly)[0];
+              string resolvedPath = GetSharedFrameworkPath(directory, semVersion);
               if (!_aspNetSharedFrameworkDirs.Any(path => path.Equals(resolvedPath, StringComparison.OrdinalIgnoreCase)))
               {
                 _aspNetSharedFrameworkDirs.Add(resolvedPath);
@@ -504,6 +501,16 @@ namespace Coverlet.Core.Instrumentation
       {
         _logger.LogVerbose(searchPath);
       }
+    }
+
+    internal static string GetSharedFrameworkPath(DirectoryInfo directory, NuGetVersion frameworkVersion)
+    {
+      return directory.GetDirectories()
+          .Select(path => (Path: path, Parsed: NuGetVersion.TryParse(path.Name, out NuGetVersion version) ? version : null))
+          .Where(item => item.Parsed != null && item.Parsed.Major == frameworkVersion.Major &&
+              item.Parsed.Minor == frameworkVersion.Minor && (frameworkVersion.IsPrerelease || !item.Parsed.IsPrerelease))
+          .OrderByDescending(item => item.Parsed)
+          .First().Path.FullName;
     }
 
     public bool TryResolveAssemblyPaths(CompilationLibrary library, List<string> assemblies)

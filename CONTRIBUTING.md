@@ -4,7 +4,7 @@ Contributions are welcome. This repository is a deliberately narrow Codebelt-mai
 
 ## Requirements
 
-Use the .NET SDK pinned by `global.json`. The retained production matrix is `netstandard2.0`, `net9.0`, and `net10.0`; tests execute on `net9.0` and `net10.0`.
+Use the .NET SDK pinned by `global.json`. The retained production matrix is `netstandard2.0`, `net10.0`, and `net11.0`; tests execute on `net10.0` and `net11.0`.
 
 ## Building, testing, and packing
 
@@ -36,7 +36,7 @@ Examples:
 
 ```bash
 dotnet test test/coverlet.MTP.tests/coverlet.MTP.tests.csproj -c Release -f net10.0 -- --filter-class Coverlet.MTP.Collector.Tests.CollectorExtensionTests
-dotnet test test/coverlet.core.tests/coverlet.core.tests.csproj -c Release -f net9.0 -- --filter-method PatternMatchingOr_Should_Report_100_Percent_Branch_Coverage
+dotnet test test/coverlet.core.tests/coverlet.core.tests.csproj -c Release -f net11.0 -- --filter-method PatternMatchingOr_Should_Report_100_Percent_Branch_Coverage
 ```
 
 ## Debugging isolated coverage tests

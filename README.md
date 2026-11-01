@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/codebeltnet/coverlet/actions/workflows/ci-pipeline.yml/badge.svg)](https://github.com/codebeltnet/coverlet/actions/workflows/ci-pipeline.yml) [![NuGet](https://img.shields.io/nuget/v/Codebelt.Coverlet.MTP.svg)](https://www.nuget.org/packages/Codebelt.Coverlet.MTP/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Cross-platform code coverage for .NET with explicit TFM support and framework-aligned dependencies.
+Cross-platform code coverage for .NET with explicit target framework support.
 
 `Codebelt.Coverlet.MTP` is a deliberately narrow Codebelt-maintained fork of [Coverlet](https://github.com/coverlet-coverage/coverlet) for Microsoft Testing Platform integration. Coverlet remains the upstream project; this repository keeps the Coverlet engine and MTP integration recognizable while focusing package identity, target frameworks, dependency groups, and CI/CD on the Codebelt-maintained MTP package.
 
@@ -22,11 +22,11 @@ The package supports:
 
 ```text
 netstandard2.0
-net9.0
 net10.0
+net11.0
 ```
 
-`netstandard2.0` is a package compatibility target. Tests execute on `net9.0` and `net10.0`.
+`netstandard2.0` is a package compatibility target. Tests execute on `net10.0` and `net11.0`.
 
 ## Installation
 
@@ -48,8 +48,8 @@ Example test project:
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="xunit.v3.mtp-v2" Version="4.0.1" />
-    <PackageReference Include="Microsoft.Testing.Platform" Version="2.4.1" />
+    <PackageReference Include="xunit.v3.mtp-v2" Version="4.0.2" />
+    <PackageReference Include="Microsoft.Testing.Platform" Version="2.5.1" />
     <PackageReference Include="Codebelt.Coverlet.MTP" Version="*" />
   </ItemGroup>
 </Project>
@@ -87,7 +87,9 @@ See [Coverlet.MTP.Integration.md](Documentation/Coverlet.MTP.Integration.md) for
 
 ## Upstream relationship
 
-This fork is based on [coverlet-coverage/coverlet](https://github.com/coverlet-coverage/coverlet). The intent is not to replace Coverlet or rewrite its instrumentation internals; the fork exists to provide explicit target-framework support and framework-aligned NuGet dependency groups for the Microsoft Testing Platform package.
+This fork is based on [coverlet-coverage/coverlet](https://github.com/coverlet-coverage/coverlet). The intent is not to replace Coverlet or rewrite its instrumentation internals; the fork exists to provide explicit target-framework support and NuGet dependency groups for the Microsoft Testing Platform package.
+
+See [UPSTREAM.md](UPSTREAM.md) for the dated synchronization history, source commits, validation results, omitted changes, and intentional differences from upstream. Release outcomes are summarized in [CHANGELOG.md](CHANGELOG.md).
 
 For Coverlet drivers outside this repository's scope, such as the console tool, VSTest collector, or MSBuild integration, use the upstream Coverlet packages and documentation.
 
