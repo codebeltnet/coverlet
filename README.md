@@ -6,6 +6,9 @@ Cross-platform code coverage for .NET with explicit TFM support and framework-al
 
 `Codebelt.Coverlet.MTP` is a deliberately narrow Codebelt-maintained fork of [Coverlet](https://github.com/coverlet-coverage/coverlet) for Microsoft Testing Platform integration. Coverlet remains the upstream project; this repository keeps the Coverlet engine and MTP integration recognizable while focusing package identity, target frameworks, dependency groups, and CI/CD on the Codebelt-maintained MTP package.
 
+> [!WARNING]
+> Coverage reports from versions 10.0.1 through 10.1.1 can silently omit library assemblies when generated dependency exclusions match a shared assembly-name prefix. Passing tests and a high coverage percentage do not establish that the expected library modules were measured. See the [10.1.2 coverage advisory](Documentation/DependencyExclusionRegression.md) for affected configurations, upstream origins, verified consumer results, upgrade checks, and the separate .NET Framework instrumentation fix validated with Cuemon.
+
 ## Scope
 
 This repository produces one public NuGet package: `Codebelt.Coverlet.MTP`. It preserves the implementation assembly name and namespace used by the MTP extension (`coverlet.MTP.dll`, `Coverlet.MTP`, and `Coverlet.MTP.TestingPlatformBuilderHook`) so existing Microsoft Testing Platform discovery remains compatible.
@@ -88,6 +91,8 @@ See [Coverlet.MTP.Integration.md](Documentation/Coverlet.MTP.Integration.md) for
 ## Upstream relationship
 
 This fork is based on [coverlet-coverage/coverlet](https://github.com/coverlet-coverage/coverlet). The intent is not to replace Coverlet or rewrite its instrumentation internals; the fork exists to provide explicit target-framework support and framework-aligned NuGet dependency groups for the Microsoft Testing Platform package.
+
+See [UPSTREAM.md](UPSTREAM.md) for verified provenance and intentional behavior differences.
 
 For Coverlet drivers outside this repository's scope, such as the console tool, VSTest collector, or MSBuild integration, use the upstream Coverlet packages and documentation.
 

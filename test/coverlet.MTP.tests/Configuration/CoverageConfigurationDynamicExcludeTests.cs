@@ -87,7 +87,7 @@ public sealed class CoverageConfigurationDynamicExcludeTests
   }
 
   [Fact]
-  public void WhenDepsJsonHelperReturnsEmptyListThenBaselineFallbackUsed()
+  public void WhenDepsJsonHelperReturnsEmptyListThenBaselineAndBuildAssetFiltersUsed()
   {
     _mockProcessAssemblyHelper
       .Setup(x => x.GetDepsJsonAssemblyNames(It.IsAny<string>(), It.IsAny<string>()))
@@ -105,7 +105,9 @@ public sealed class CoverageConfigurationDynamicExcludeTests
 
     string[] result = config.GetExcludeFilters();
 
-    Assert.Equal(["[coverlet.*]*", "[Microsoft.VisualStudio.TestPlatform.*]*", "[testhost*]*", "[ReportGenerator.*]*"], result);
+    Assert.Equal(["[coverlet.*]*", "[Microsoft.VisualStudio.TestPlatform.*]*", "[testhost*]*", "[ReportGenerator.*]*",
+      "[xunit.abstractions]*", "[xunit.runner.visualstudio.testadapter]*",
+      "[xunit.v3.runner.utility.netcore]*", "[xunit.v3.runner.utility.netfx]*"], result);
   }
 
   [Fact]
@@ -222,8 +224,8 @@ public sealed class CoverageConfigurationDynamicExcludeTests
 
     string[] result = config.GetExcludeFilters();
 
-    // Three-segment name → wildcarded to [Microsoft.Testing.*]*
-    Assert.Contains("[Microsoft.Testing.*]*", result);
+    Assert.Contains("[Microsoft.Testing.Extensions.MSBuild]*", result);
+    Assert.DoesNotContain("[Microsoft.Testing.*]*", result);
   }
 
   [Fact]
@@ -246,10 +248,9 @@ public sealed class CoverageConfigurationDynamicExcludeTests
 
     string[] result = config.GetExcludeFilters();
 
-    // Three-segment names are wildcarded to their two-segment prefix.
-    Assert.Contains("[xunit.v3.*]*", result);
+    Assert.Contains("[xunit.v3.core]*", result);
     Assert.Contains("[testhost]*", result);
-    Assert.Contains("[Microsoft.Testing.*]*", result);
+    Assert.Contains("[Microsoft.Testing.Extensions.MSBuild]*", result);
   }
 
   #endregion

@@ -2,8 +2,13 @@ name: Codebelt Coverlet MTP CI
 
 on:
   pull_request:
-    branches: [master]
+    branches: [master, releases/v10]
   workflow_dispatch:
+    inputs:
+      run_mac_tests:
+        type: boolean
+        description: Include macOS tests and package validation despite hosted-runner capacity constraints.
+        default: false
 
 permissions:
   contents: read
@@ -49,7 +54,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-26.04, windows-2025, macos-26]
+        os: ${{ fromJSON(github.event_name == 'workflow_dispatch' && inputs.run_mac_tests && '["ubuntu-26.04","windows-2025","macos-26"]' || '["ubuntu-26.04","windows-2025"]') }}
         project_name: [core, core-coverage, mtp]
         include:
           - project_name: core
@@ -88,7 +93,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-26.04, windows-2025, macos-26]
+        os: ${{ fromJSON(github.event_name == 'workflow_dispatch' && inputs.run_mac_tests && '["ubuntu-26.04","windows-2025","macos-26"]' || '["ubuntu-26.04","windows-2025"]') }}
         framework: [net9.0, net10.0]
     permissions:
       contents: read

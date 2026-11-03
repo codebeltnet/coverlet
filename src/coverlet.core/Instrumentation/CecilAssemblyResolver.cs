@@ -45,9 +45,9 @@ namespace Coverlet.Core.Instrumentation
     private static readonly System.Reflection.Assembly s_netStandardAssembly;
     private static readonly string s_name;
     private static readonly byte[] s_publicKeyToken;
-    private static readonly AssemblyDefinition s_assemblyDefinition;
 
     private readonly string _modulePath;
+    private readonly Lazy<AssemblyDefinition> _netStandardAssemblyDefinition;
     private readonly Lazy<CompositeCompilationAssemblyResolver> _compositeResolver;
     private readonly ILogger _logger;
 
@@ -60,7 +60,6 @@ namespace Coverlet.Core.Instrumentation
         System.Reflection.AssemblyName name = s_netStandardAssembly.GetName();
         s_name = name.Name;
         s_publicKeyToken = name.GetPublicKeyToken();
-        s_assemblyDefinition = AssemblyDefinition.ReadAssembly(s_netStandardAssembly.Location);
       }
       catch (FileNotFoundException)
       {
@@ -72,6 +71,16 @@ namespace Coverlet.Core.Instrumentation
     {
       _modulePath = modulePath;
       _logger = logger;
+
+      // Forwarded types must retain this resolver's framework fallbacks and search paths.
+      // Register the per-resolver facade so the base cache also owns its disposal.
+      _netStandardAssemblyDefinition = new Lazy<AssemblyDefinition>(() =>
+      {
+        AssemblyDefinition assembly = AssemblyDefinition.ReadAssembly(s_netStandardAssembly.Location,
+          new ReaderParameters { AssemblyResolver = this });
+        RegisterAssembly(assembly);
+        return assembly;
+      }, true);
 
       // this is lazy because we cannot create NetCoreSharedFrameworkResolver if not on .NET Core runtime,
       // runtime folders are different
@@ -117,7 +126,7 @@ namespace Coverlet.Core.Instrumentation
     {
       if (CheckIfSearchingNetstandard(name))
       {
-        return s_assemblyDefinition;
+        return _netStandardAssemblyDefinition.Value;
       }
       else
       {
