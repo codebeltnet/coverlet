@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [10.1.2] - 2026-11-03
+
+This is a patch release that corrects dependency-driven exclusion filters in Coverlet.MTP so they target the exact assemblies discovered from `deps.json` rather than broad package-name prefixes, and aligns the integration documentation with that behavior.
+
+### Changed
+
+- Rewrite the Coverlet.MTP exclusion guidance to describe dependency discovery from `deps.json` managed runtime assets, exact assembly filters, and the build assets excluded by default, replacing the assembly naming-convention warning.
+
+### Fixed
+
+- Generate exclusion filters from the managed runtime assets, including RID-specific assemblies, declared by non-project libraries in `deps.json` instead of from package IDs, so dependencies no longer exclude project assemblies that merely share a name prefix,
+- Accept hyphenated assembly names such as `[xunit.v3.mtp-v2]*` as valid exclude filters, and exclude the `xunit.abstractions`, `xunit.runner.visualstudio.testadapter`, `xunit.v3.runner.utility.netcore`, and `xunit.v3.runner.utility.netfx` build assets that the xUnit runner and VSTest adapter copy without `deps.json` runtime entries.
+
 ## [10.1.1] - 2026-10-20
 
 This is a patch release that fixes module unload mutex collisions between unrelated coverage sessions and updates the Microsoft runtime pins and the `System.Security.Cryptography.Pkcs` override used by coverlet.core, with no new capabilities.
@@ -97,6 +110,7 @@ This is a minor release focused on the Codebelt.Coverlet.MTP fork with narrowed 
 - .vscode/settings.json configuration,
 - .devcontainer legacy configuration.
 
+[10.1.2]: https://github.com/codebeltnet/coverlet/compare/v10.1.1...v10.1.2
 [10.1.1]: https://github.com/codebeltnet/coverlet/compare/v10.1.0...v10.1.1
 [10.1.0]: https://github.com/codebeltnet/coverlet/compare/v10.0.1...v10.1.0
 [10.0.1]: https://github.com/codebeltnet/coverlet/compare/v10.0.0...v10.0.1
