@@ -49,14 +49,25 @@ namespace Coverlet.Core.Helpers
 
           foreach (RuntimeLibrary lib in context.RuntimeLibraries)
           {
-            // Skip the test project itself; we only want infrastructure packages.
+            // Project libraries are coverage candidates, not infrastructure dependencies.
             if (lib.Type.Equals("project", StringComparison.OrdinalIgnoreCase))
               continue;
 
-            if (!string.IsNullOrWhiteSpace(lib.Name) &&
-                !lib.Name.Equals(testAssemblyName, StringComparison.OrdinalIgnoreCase))
+            // Package IDs need not match their assemblies (for example xunit.v3.mtp-v2).
+            // Include every managed runtime asset, including RID-specific assemblies.
+            foreach (string assetPath in lib.RuntimeAssemblyGroups.SelectMany(group => group.AssetPaths))
             {
-              names.Add(lib.Name);
+              string extension = Path.GetExtension(assetPath);
+              if (!extension.Equals(".dll", StringComparison.OrdinalIgnoreCase) &&
+                  !extension.Equals(".exe", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+              string name = Path.GetFileNameWithoutExtension(assetPath);
+              if (!string.IsNullOrWhiteSpace(name) &&
+                  !name.Equals(testAssemblyName, StringComparison.OrdinalIgnoreCase))
+              {
+                names.Add(name);
+              }
             }
           }
         }
@@ -71,29 +82,12 @@ namespace Coverlet.Core.Helpers
 
     /// <summary>
     /// Converts a simple assembly name to a coverlet exclude-filter pattern.
-    /// For names with three or more dot-separated segments the third segment onwards is
-    /// replaced by a wildcard so the filter is resilient to assembly names that differ
-    /// from the NuGet package name (e.g. dashes vs. dots in the suffix).
-    /// <list type="bullet">
-    ///   <item><c>xunit.v3.mtp-v2</c>  → <c>[xunit.v3.*]*</c></item>
-    ///   <item><c>Microsoft.Extensions.Configuration.Binder</c> → <c>[Microsoft.Extensions.*]*</c></item>
-    ///   <item><c>coverlet.core</c>     → <c>[coverlet.core]*</c></item>
-    ///   <item><c>xunit</c>             → <c>[xunit]*</c></item>
-    /// </list>
+    /// Matches only that assembly, so dependencies cannot exclude project assemblies
+    /// merely because they share a name prefix.
     /// </summary>
     internal static string ToExcludeFilter(string assemblyName)
     {
-      int first = assemblyName.IndexOf('.');
-      if (first < 0)
-        return $"[{assemblyName}]*";
-
-      int second = assemblyName.IndexOf('.', first + 1);
-      if (second < 0)
-        return $"[{assemblyName}]*"; // exactly two segments — keep exact
-
-      // Three or more segments: use first two as prefix and wildcard the rest.
-      string prefix = assemblyName.Substring(0, second);
-      return $"[{prefix}.*]*";
+      return $"[{assemblyName}]*";
     }
 
     /// <summary>
