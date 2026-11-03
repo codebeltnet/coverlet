@@ -7,7 +7,7 @@ Cross-platform code coverage for .NET with explicit TFM support and framework-al
 `Codebelt.Coverlet.MTP` is a deliberately narrow Codebelt-maintained fork of [Coverlet](https://github.com/coverlet-coverage/coverlet) for Microsoft Testing Platform integration. Coverlet remains the upstream project; this repository keeps the Coverlet engine and MTP integration recognizable while focusing package identity, target frameworks, dependency groups, and CI/CD on the Codebelt-maintained MTP package.
 
 > [!WARNING]
-> Coverage reports from versions 10.0.1 through 10.1.1 can silently omit library assemblies when generated dependency exclusions match a shared assembly-name prefix. Passing tests and a high coverage percentage do not establish that the expected library modules were measured. See the [10.1.2 coverage advisory](Documentation/DependencyExclusionRegression.md) for affected configurations, the upstream origin, verified consumer results, upgrade checks, and the separate unresolved Cuemon .NET Framework limitation.
+> Coverage reports from versions 10.0.1 through 10.1.1 can silently omit library assemblies when generated dependency exclusions match a shared assembly-name prefix. Passing tests and a high coverage percentage do not establish that the expected library modules were measured. See the [10.1.2 coverage advisory](Documentation/DependencyExclusionRegression.md) for affected configurations, upstream origins, verified consumer results, upgrade checks, and the separate .NET Framework instrumentation fix validated with Cuemon.
 
 ## Scope
 

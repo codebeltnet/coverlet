@@ -11,7 +11,7 @@ More information is available here:
 `Codebelt.Coverlet.MTP` packages Coverlet's Microsoft Testing Platform integration while preserving the implementation assembly name `coverlet.MTP.dll` for extension discovery.
 
 > [!WARNING]
-> Versions 10.0.1 through 10.1.1 can omit project assemblies under default dependency exclusions when their assembly names share a generated prefix. The [10.1.2 coverage advisory](DependencyExclusionRegression.md) explains the correction, upstream origin, consumer validation, and remaining Cuemon .NET Framework instrumentation failure. Existing high percentages or successful test runs do not establish that all expected modules were included.
+> Versions 10.0.1 through 10.1.1 can omit project assemblies under default dependency exclusions when their assembly names share a generated prefix. The [10.1.2 coverage advisory](DependencyExclusionRegression.md) explains the correction, upstream origins, consumer validation, and the separate .NET Framework instrumentation fix validated with Cuemon. Existing high percentages or successful test runs do not establish that all expected modules were included.
 
 ## Supported Runtime Versions
 
