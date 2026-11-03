@@ -6,15 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ## [10.1.2] - 2026-11-03
 
-This is a patch release that corrects dependency-driven exclusion filters in Coverlet.MTP so they target the exact assemblies discovered from `deps.json` rather than broad package-name prefixes, and aligns the integration documentation with that behavior.
+This is a patch release that restores coverage for project assemblies accidentally matched by generated dependency exclusions. It corrects inherited upstream behavior first included in Codebelt 10.0.1, without changing package identity, public APIs, dependency versions, or supported target frameworks. Corrected module selection can change coverage totals and quality-gate outcomes.
+
+> [!WARNING]
+> Versions 10.0.1 through 10.1.1 can produce incomplete coverage while tests and CI pass. BenchmarkDotNet's historical 92.3% report measured only its tooling runner; the library modules were missing. Review expected modules and source files when regenerating coverage. See the [full advisory](Documentation/DependencyExclusionRegression.md) for affected configurations, upstream [PR #1946](https://github.com/coverlet-coverage/coverlet/pull/1946) and commit [`c502253`](https://github.com/coverlet-coverage/coverlet/commit/c5022539cfdf3c6246c2e49b7789d7e8e529ef47), historical CI evidence, and the separate Cuemon .NET Framework instrumentation failure that remains unresolved.
 
 ### Changed
 
-- Rewrite the Coverlet.MTP exclusion guidance to describe dependency discovery from `deps.json` managed runtime assets, exact assembly filters, and the build assets excluded by default, replacing the assembly naming-convention warning.
+- Document exact dependency discovery and retained xUnit build exclusions, with prominent coverage alerts, upstream provenance, affected-version analysis, and verified results for the seven reported consumer repositories.
 
 ### Fixed
 
-- Generate exclusion filters from the managed runtime assets, including RID-specific assemblies, declared by non-project libraries in `deps.json` instead of from package IDs, so dependencies no longer exclude project assemblies that merely share a name prefix,
+- Generate exclusion filters from the managed runtime assets, including RID-specific assemblies, declared by non-project libraries in `deps.json` instead of from package IDs, so dependencies no longer exclude project assemblies that merely share a name prefix; preserve project outputs also listed in SDK reference entries,
 - Accept hyphenated assembly names such as `[xunit.v3.mtp-v2]*` as valid exclude filters, and exclude the `xunit.abstractions`, `xunit.runner.visualstudio.testadapter`, `xunit.v3.runner.utility.netcore`, and `xunit.v3.runner.utility.netfx` build assets that the xUnit runner and VSTest adapter copy without `deps.json` runtime entries.
 
 ## [10.1.1] - 2026-10-20
