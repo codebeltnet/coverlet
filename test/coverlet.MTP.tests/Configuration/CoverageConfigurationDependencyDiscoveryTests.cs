@@ -30,6 +30,9 @@ public sealed class CoverageConfigurationDependencyDiscoveryTests
             ".NETCoreApp,Version=v10.0": {
               "MyTests/1.0.0": { "runtime": { "MyTests.dll": {} } },
               "{{projectAssembly}}/1.0.0": { "runtime": { "{{projectAssembly}}.dll": {} } },
+              "{{projectAssembly}}.Reference/1.0.0.0": {
+                "runtime": { "{{projectAssembly}}.dll": {}, "External.Reference.dll": {} }
+              },
               "{{packageName}}/1.0.0": {
                 "runtime": {
                   "lib/net10.0/{{dependencyAssembly}}.dll": {},
@@ -46,6 +49,7 @@ public sealed class CoverageConfigurationDependencyDiscoveryTests
           "libraries": {
             "MyTests/1.0.0": { "type": "project", "serviceable": false, "sha512": "" },
             "{{projectAssembly}}/1.0.0": { "type": "project", "serviceable": false, "sha512": "" },
+            "{{projectAssembly}}.Reference/1.0.0.0": { "type": "reference", "serviceable": false, "sha512": "" },
             "{{packageName}}/1.0.0": { "type": "package", "serviceable": false, "sha512": "" },
             "Empty.Package/1.0.0": { "type": "package", "serviceable": false, "sha512": "" }
           }
@@ -59,7 +63,7 @@ public sealed class CoverageConfigurationDependencyDiscoveryTests
         Mock.Of<IProcessExitHandler>(), Mock.Of<IRetryHelper>(), Mock.Of<IFileSystem>(),
         Mock.Of<Coverlet.Core.Abstractions.ILogger>(), Mock.Of<ISourceRootTranslator>());
       string[] modules = [
-        $"{projectAssembly}.dll", $"{dependencyAssembly}.dll", "External.Helper.dll", "External.Windows.dll",
+        $"{projectAssembly}.dll", $"{dependencyAssembly}.dll", "External.Helper.dll", "External.Windows.dll", "External.Reference.dll",
         "Microsoft.VisualStudio.TestPlatform.TestFramework.dll", "testhost.dll", "ReportGenerator.Mtp.dll",
         "xunit.abstractions.dll", "xunit.runner.visualstudio.testadapter.dll",
         "xunit.v3.runner.utility.netcore.dll", "xunit.v3.runner.utility.netfx.dll"

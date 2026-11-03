@@ -38,6 +38,7 @@ namespace Coverlet.Core.Helpers
         throw new ArgumentException("Test assembly name must not be null or whitespace.", nameof(testAssemblyName));
 
       var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+      var projectNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
       using var reader = new DependencyContextJsonReader();
       foreach (string depsFile in Directory.EnumerateFiles(testModuleDirectory, "*.deps.json"))
@@ -49,9 +50,7 @@ namespace Coverlet.Core.Helpers
 
           foreach (RuntimeLibrary lib in context.RuntimeLibraries)
           {
-            // Project libraries are coverage candidates, not infrastructure dependencies.
-            if (lib.Type.Equals("project", StringComparison.OrdinalIgnoreCase))
-              continue;
+            bool isProject = lib.Type.Equals("project", StringComparison.OrdinalIgnoreCase);
 
             // Package IDs need not match their assemblies (for example xunit.v3.mtp-v2).
             // Include every managed runtime asset, including RID-specific assemblies.
@@ -66,7 +65,10 @@ namespace Coverlet.Core.Helpers
               if (!string.IsNullOrWhiteSpace(name) &&
                   !name.Equals(testAssemblyName, StringComparison.OrdinalIgnoreCase))
               {
-                names.Add(name);
+                if (isProject)
+                  projectNames.Add(name);
+                else
+                  names.Add(name);
               }
             }
           }
@@ -77,6 +79,9 @@ namespace Coverlet.Core.Helpers
         }
       }
 
+      // The SDK can also list a project executable's DLL in a separate reference entry.
+      // Its project identity takes precedence over that duplicate dependency entry.
+      names.ExceptWith(projectNames);
       return [.. names];
     }
 
