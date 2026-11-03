@@ -1,9 +1,9 @@
-# Coverage advisory: dependency exclusion regression
+# Coverage advisory: incomplete library coverage
 
 Recorded on 2026-11-03 for the `Codebelt.Coverlet.MTP` 10.1.2 patch. This advisory describes inspected source and validation performed; it does not establish that a package has been published.
 
 > [!WARNING]
-> `Codebelt.Coverlet.MTP` 10.0.1, 10.1.0, and 10.1.1 can silently omit library assemblies when automatically generated dependency exclusions match a shared assembly-name prefix. Tests and CI can pass, and Codecov or Sonar can display a high percentage for the small amount of code that remains. Check the expected modules and source files, not just the percentage. The 10.1.2 patch corrects this filtering; Cuemon's separate .NET Framework instrumentation failure described below remains unresolved.
+> `Codebelt.Coverlet.MTP` 10.0.1, 10.1.0, and 10.1.1 can silently omit library assemblies when automatically generated dependency exclusions match a shared assembly-name prefix. Tests and CI can pass, and Codecov or Sonar can display a high percentage for the small amount of code that remains. Check the expected modules and source files, not just the percentage. The 10.1.2 patch corrects this filtering and a separate framework assembly-resolution defect reproduced with Cuemon on .NET Framework 4.8. The two defects have different upstream origins and failure conditions.
 
 ## Affected scope
 
@@ -75,22 +75,55 @@ The comparison used Windows x64 and .NET 10 Release builds of isolated copies of
 
 The table counts library modules and their sequence points. BenchmarkDotNet also retains `dotnet-bdn-runner` coverage, with 11 of 12 sequence points visited in its functional test report. Its main library unit-test report alone has 173 of 194 sequence points visited. For repositories with multiple test projects, sequence points are deduplicated by module, source file, method, and source span; visited points are the union across their reports. They are not sums of repeated module totals. These results confirm module inclusion and executed code, not that every line must be covered. Swashbuckle's first long-path temporary copy triggered a Windows XML/URI path error with both collectors; the reported comparison was repeated successfully from a short path.
 
+All 21 projects were rerun after the separate resolver correction described below. All 1,943 tests passed again, and each project's module names, total sequence points, and visited sequence points matched its preceding filter-corrected report. Those reruns are retained in each project's `fixed-resolver` directory, with `resolver-consumer-summary.json` recording the comparison under the local validation-artifact root.
+
 Local snapshot provenance (all include pre-existing working-tree edits): BenchmarkDotNet `c95c59c`, Carter `bb8e6b5`, Globalization `af2cf95`, ASP.Versioning `b79c017`, Swashbuckle.AspNetCore `3393a7c`, Newtonsoft.Json `c061a0b`, and AWS Signature V4 `cc77402`. A commit identifier alone does not reproduce those edited snapshots. Build logs, test logs, snapshot metadata, and raw reports are retained locally under `artifacts/dependency-exclusion-validation`; they are ignored validation artifacts, not files shipped in the package.
 
-## Separate unresolved Cuemon .NET Framework failure
+## Separate Cuemon .NET Framework instrumentation fix
 
 > [!IMPORTANT]
-> The dependency-prefix fix does not resolve every source of incomplete coverage. Cuemon's .NET Framework instrumentation failure was reproduced with both collectors and remains outside this patch's scope.
+> The dependency-prefix correction alone did not repair Cuemon's .NET Framework coverage. A second correction in 10.1.2 fixes the reproduced assembly-resolution failure. Successful test execution alone concealed both defects.
 
-An isolated `Cuemon.Core.Tests` .NET Framework 4.8 run passed all 729 tests with both released 10.1.1 and the fixed `netstandard2.0` collector DLLs. Both reports omit `Cuemon.Core` and `Cuemon.Kernel`. Diagnostics show `Mono.Cecil.AssemblyResolutionException` during instrumentation: `Cuemon.Core.dll` cannot resolve `System, Version=4.0.0.0`, and `Cuemon.Kernel.dll` cannot resolve `mscorlib, Version=4.0.0.0`. Both collectors restore the modules after the failures. Other modules produce 832 visited sequence points out of 4,286 in both reports; passing tests do not establish complete instrumentation.
+An isolated `Cuemon.Core.Tests` .NET Framework 4.8 run passed all 729 tests with both released 10.1.1 and the collector containing only the dependency-filter correction. Both reports omitted `Cuemon.Core`, `Cuemon.Kernel`, and `Cuemon.Extensions.Core`. Diagnostics showed `Mono.Cecil.AssemblyResolutionException` while writing metadata for optional enum parameters: `Cuemon.Core.dll` and `Cuemon.Extensions.Core.dll` could not resolve `System, Version=4.0.0.0`, and `Cuemon.Kernel.dll` could not resolve `mscorlib, Version=4.0.0.0`. The collector restored the modules after those instrumentation failures and continued running tests. The resulting reports had only 832 visited sequence points out of 4,286 across the remaining modules.
 
-That snapshot is based on local Cuemon commit `9d5e7197` plus existing edits. It was built with SDK `11.0.100-rc.3.26522.148`; `MinVerVersionOverride=11.0.0-rc.3` retained the assembly major version expected by its tests in the Git-free copy. An initial build without that override failed one assembly-version assertion with either collector; the versioned comparison above passed all tests. This check covers one Cuemon test project, not its entire .NET Framework suite. No remedy for the resolution failure is claimed here.
+The runtime `netstandard.dll` facade was cached globally as a Cecil assembly loaded without `ReaderParameters.AssemblyResolver`. Resolving a forwarded enum therefore used Cecil's default resolver instead of Coverlet's configured runtime/reference-assembly fallbacks. The correction loads the same runtime facade lazily per resolver with `AssemblyResolver = this` and registers it in the resolver's cache for disposal. Official facade identity checks, framework search order, and exclusion configuration are preserved; there are no Cuemon-specific paths or names in production code.
+
+That unbound facade-loading pattern is already present in upstream [PR #625](https://github.com/coverlet-coverage/coverlet/pull/625), [commit `3856c76a5627a8d38d2cf2eae9360f05f7d878c5`](https://github.com/coverlet-coverage/coverlet/commit/3856c76a5627a8d38d2cf2eae9360f05f7d878c5), whose source-commit date is 2019-12-03. This establishes source provenance, not the first failing package release or that every historical .NET Framework workload failed. It is distinct from dependency-filter PR #1946. The concrete failure was reproduced against released Codebelt 10.1.1 and the intermediate filter-only correction.
+
+After replacing only the two `netstandard2.0` collector DLLs with the resolver-corrected build, the same 729 tests passed with unchanged exclusion settings. Diagnostics contained no module-instrumentation failures. The three previously missing library modules appeared with executed sequence points:
+
+| Module | Before resolver correction | Fixed visited / total sequence points |
+| --- | --- | ---: |
+| `Cuemon.Core` | Missing | 2,194 / 2,825 |
+| `Cuemon.Kernel` | Missing | 465 / 1,245 |
+| `Cuemon.Extensions.Core` | Missing | 205 / 692 |
+
+That snapshot is based on local Cuemon commit `9d5e7197` plus existing edits. It was built with SDK `11.0.100-rc.3.26522.148`; `MinVerVersionOverride=11.0.0-rc.3` retained the assembly major version expected by its tests in the Git-free copy. An initial build without that override failed one assembly-version assertion with either collector; the versioned comparison above passed all tests. This check covers one Cuemon test project on Windows x64, not its entire .NET Framework suite. Logs and reports for the focused reproduction are retained under `artifacts/dependency-exclusion-validation/consumers/cuemon-net48-versioned/resolver-before` and `resolver-after`, with adjacent test logs.
 
 ## Regression protection and validation limits
 
 [CoverageConfigurationDependencyDiscoveryTests](../test/coverlet.MTP.tests/Configuration/CoverageConfigurationDependencyDiscoveryTests.cs) exercises real `deps.json` reading, dynamic configuration, production filter validation, and module selection. It covers the reported Codebelt names, a generic shared prefix, differing package/assembly names, multiple runtime assemblies, RID-specific assets, duplicate project/reference entries, hyphens, infrastructure exclusions, and explicit CLI/configuration wildcard behavior. [ProcessAssemblyHelperTests](../test/coverlet.core.tests/Helpers/ProcessAssemblyHelperTests.cs) and [InstrumentationHelperTests](../test/coverlet.core.tests/Helpers/InstrumentationHelperTests.cs) cover discovery, exact filters, pruning, and filter validity.
 
-On Windows, the complete MTP suite passed 427 tests with seven platform skips on each of .NET 9 and .NET 10. The focused core suites passed 121 tests on each framework. The `netstandard2.0` build passed without warnings or errors. The consumer checks above used replacement collector DLLs, not installation of a newly packed NuGet package. Fixed-consumer runs on Linux/macOS and .NET 11 were not performed; the historical .NET 11 reports establish the earlier failure only. These results do not assert that all possible coverage failures are resolved.
+[CecilAssemblyResolverTests](../test/coverlet.core.tests/Instrumentation/CecilAssemblyResolverTests.cs) resolves real runtime facade forwards through a private framework search directory for `StringComparison` and `MidpointRounding`, then writes a consumer assembly containing an optional enum parameter. The original resolver failed the configured-path assertions; the corrected resolver passes both cases. This regression exercises Cecil's real resolution and metadata-writing path without requiring Cuemon or a .NET Framework installation.
+
+On Windows, after the resolver correction, the complete core suite passed 351 tests with nine platform skips, and the complete MTP suite passed 427 tests with seven platform skips, on each of .NET 9 and .NET 10. The `netstandard2.0` build passed without warnings or errors. The consumer checks above used replacement collector DLLs, not installation of a newly packed NuGet package. Fixed-consumer runs on Linux/macOS and .NET 11 were not performed; the historical .NET 11 reports establish the earlier failure only. These results do not assert that all possible coverage failures are resolved.
+
+## Ubuntu remote validation on 2026-11-03
+
+The current working tree, including the resolver correction and its new tests, was built and tested in an isolated Linux x64 Docker workspace through the `dotnet-remote-testing` skill. The runner automatically selected `codebeltnet/ubuntu-testrunner:8-9-10-11` to cover the discovered framework set, pinned to digest `sha256:1df4b744ff2b2bf215fa2dc63e4f81b3c8dcf7c701c9bd456c78a2ec160713d9`. The executed test projects target .NET 9 and .NET 10; the image's additional SDKs do not establish execution on those other frameworks. The observed build/test SDK was 10.0.403. The run used the root `coverlet.slnx` solution and Debug configuration without modifying project files or package references.
+
+| Test project | .NET 9 passed / skipped / failed | .NET 10 passed / skipped / failed |
+| --- | ---: | ---: |
+| `coverlet.core.tests` | 347 / 13 / 0 | 347 / 13 / 0 |
+| `coverlet.MTP.tests` | 417 / 17 / 0 | 417 / 17 / 0 |
+| `coverlet.core.coverage.tests` | 95 / 0 / 0 | 95 / 0 / 0 |
+| `coverlet.MTP.validation.tests` | 2 / 6 / 36 | 2 / 6 / 36 |
+
+Both forwarded-enum resolver cases passed on each framework. All six real dependency-discovery/filter-application cases also passed on each framework, including the exact `Codebelt.Extensions.Xunit` / `Codebelt.Extensions.BenchmarkDotNet` reproduction, generic names, and explicit CLI/configuration wildcards. The three core/MTP/instrumentation suites passed 1,718 tests in total with 60 platform skips.
+
+The entire solution run was not green: its aggregate result was 1,722 passed, 72 skipped, and 72 failed, with exit code 1. Every failure was in package validation because `/workspace/artifacts/package/debug` was absent from the isolated workspace. For example, `CollectCoverageTests.BasicCoverage_CollectsDataForCoveredLines` failed on both frameworks with `DirectoryNotFoundException` in `MtpValidationTestBase.GetCoverletMtpPackageVersion`, which requires a package produced by `dotnet pack` first. CI supplies that package in a separate pack/download phase; the remote runner performs restore, build, and test. This run does not validate installation or use of a newly packed package.
+
+The runner reported 547.2 seconds of cumulative test time and 325.7 seconds of wall time including preparation, restore, and build; parallel execution accounts for cumulative test time exceeding wall time. Runner output and the retained core, MTP, and package-validation TRX files are under `artifacts/dependency-exclusion-validation/ubuntu-remote`. Cuemon's actual .NET Framework 4.8 execution remains the Windows check described above; the portable resolver regression was verified on Linux. Modern consumer repositories were not rerun in this container.
 
 ## Upgrade and report review
 
