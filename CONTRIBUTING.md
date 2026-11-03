@@ -14,6 +14,8 @@ Target `releases/v10` for changes to the 10.x maintenance line, following the ma
 
 After integrating a maintenance pull request and completing its checks, create the fixed full-version tag, such as `v10.1.2`, on the exact commit to release before starting the manual CI/release workflow. MinVer otherwise calculates a prerelease version above the latest release tag. Select `releases/v10` in the workflow's branch dropdown while that tagged commit is still its tip, or use `gh workflow run ci-pipeline.yml --ref v10.1.2` to select the tagged commit explicitly. The existing workflow builds, tests, packs, and validates that source before requesting approval in the `Production` environment for NuGet publication. The environment currently permits this maintenance branch and retains its required reviewer. The Actions guide's moving major-version tags are separate from this maintenance branch; NuGet releases retain fixed full-version tags. Do not move existing release tags.
 
+CI requires Windows and Ubuntu tests and package validation. macOS is optional because hosted-runner capacity can prevent jobs from starting. To include it, enable `run_mac_tests` in the manual workflow form, or add `-f run_mac_tests=true` to the workflow command. The option includes macOS in both matrices; every selected job must pass before publication. A default run does not establish macOS compatibility. This follows the opt-in behavior in [Codebelt xUnit's workflow](https://github.com/codebeltnet/xunit/blob/main/.github/workflows/ci-pipeline.yml).
+
 ## Building, testing, and packing
 
 Clone this repository:
