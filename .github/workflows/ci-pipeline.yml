@@ -2,7 +2,7 @@ name: Codebelt Coverlet MTP CI
 
 on:
   pull_request:
-    branches: [master]
+    branches: [master, releases/v10]
   workflow_dispatch:
 
 permissions:
