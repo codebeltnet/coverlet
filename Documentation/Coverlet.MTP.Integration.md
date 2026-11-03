@@ -81,7 +81,7 @@ dotnet exec <test-assembly.dll> --help
 | `--coverlet-file-prefix <prefix>` | Prefix for coverage report filenames to prevent overwrites when multiple test projects write to the same directory. When specified, files are named `<prefix>.coverage.<extension>` instead of `coverage.<extension>`. (default: `none`) |
 | `--coverlet-include <filter>` | Include assemblies matching filters (e.g., `[Assembly]Type`). Can be specified multiple times. (default: `none`) |
 | `--coverlet-include-directory <path>` | Include additional directories for sources. Can be specified multiple times. (default: `none`) |
-| `--coverlet-exclude <filter>` | Exclude assemblies matching filters (e.g., `[Assembly]Type`). Can be specified multiple times. User-specified filters are merged with defaults. (defaults: see "Default Exclusions Behavior" below) |
+| `--coverlet-exclude <filter>` | Exclude assemblies matching filters (e.g., `[Assembly]Type`). Can be specified multiple times. User-specified filters are merged with the permanent baseline; dynamic exclusions are skipped. (defaults: see "Default Exclusions Behavior" below) |
 | `--coverlet-exclude-by-file <pattern>` | Exclude source files matching glob patterns. Can be specified multiple times. (default: `none`) |
 | `--coverlet-exclude-by-attribute <attribute>` | Exclude methods/classes decorated with attributes. Can be specified multiple times. User-specified attributes are merged with defaults. (defaults: see "Default Exclusions Behavior" below) |
 | `--coverlet-include-test-assembly` | Include test assembly in coverage. (default: `false`) |
@@ -105,17 +105,18 @@ Coverlet.MTP applies sensible default exclusions to reduce noise in coverage rep
 
 **Command Line Defaults:**
 
-When using command line options **without** a configuration file, the following defaults are **automatically merged** with user-specified exclusions:
+When using command line options **without** a configuration file, the following baseline exclusions are **automatically merged** with user-specified exclusions:
 
-- **Default Exclude Filters:** `[coverlet.*]*`, `[Microsoft.VisualStudio.TestPlatform.*]*`, `[testhost*]*`
+- **Default Exclude Filters:** `[coverlet.*]*`, `[Microsoft.VisualStudio.TestPlatform.*]*`, `[testhost*]*`, `[ReportGenerator.*]*`
 - **Default Exclude by Attributes:** `ExcludeFromCodeCoverage`, `ExcludeFromCodeCoverageAttribute`, `GeneratedCodeAttribute`, `CompilerGeneratedAttribute`
 
-**Dynamic Exclude Filters (Assembly Naming Convention):**
+**Dynamic Exclude Filters (Dependency Discovery):**
 
-Coverlet.MTP also applies **dynamic exclusions** derived from the test assembly name and its namespace conventions at runtime. These are intended to automatically exclude common test infrastructure assemblies that follow standard naming patterns.
+When neither `--coverlet-exclude` nor a configuration file supplies exclusions, Coverlet.MTP also discovers managed runtime assemblies from non-project libraries in the `*.deps.json` files next to the test module, including RID-specific runtime assets. Assemblies already loaded in the controller process are also excluded, except for the test assembly itself.
 
-> [!WARNING]
-> **Assembly Naming Limitation:** Dynamic exclusions rely on the assembly name following conventional naming schemas (e.g., `MyApp.Tests`, `MyApp.UnitTests`, `MyApp.IntegrationTests`). Assemblies that **do not follow these naming conventions** will **not** be automatically excluded by the dynamic filter. In such cases, you must add explicit `--coverlet-exclude` filters manually.
+Generated filters match exact assembly names, such as `[Example.Testing.Infrastructure]*`. Package IDs are resolved to their runtime assembly filenames instead of being generalized into namespace wildcards. A project assembly sharing a dependency's name prefix remains eligible for coverage. User-specified wildcard filters retain their normal matching behavior.
+
+Default discovery also excludes the exact xUnit build asset names `xunit.abstractions`, `xunit.runner.visualstudio.testadapter`, `xunit.v3.runner.utility.netcore`, and `xunit.v3.runner.utility.netfx`. The xUnit runner and VSTest adapter copy these assets without declaring runtime entries in `deps.json`. These defaults are skipped with explicit exclusion filters or a configuration file.
 
 **Configuration File Behavior (Authoritative Mode):**
 
