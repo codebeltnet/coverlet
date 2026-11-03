@@ -32,6 +32,8 @@ This major release adds .NET 11 support, removes the dedicated .NET 9 target, an
 
 ### Fixed
 
+- Prevent invalid IL from branch trampolines near exception-handler boundaries and optimized loop back-edges,
+- Use exact assembly-name exclusions for assemblies loaded in the MTP controller process, avoiding accidental exclusions of application assemblies with shared prefixes, and accept hyphens in assembly filters,
 - Instrument local functions when CompilerGeneratedAttribute or GeneratedCodeAttribute is excluded, while continuing to honor other configured exclusion attributes,
 - Resolve shared-framework assemblies when runtime directory names contain version suffixes,
 - Align pattern-matching branch assertions with the selected SDK's compiled output.
