@@ -12,6 +12,18 @@ This ledger records the upstream origin and retained behavior relevant to the 10
 
 These are verified commit targets. No tag-creation dates, earlier synchronization dates, or historical test outcomes are inferred from them. The 10.0.1 release date in the changelog is not a tag-creation timestamp.
 
+## 2026-11-03: prepare the 10.x maintenance line
+
+Operation date: 2026-11-03. The selected release strategy keeps `master` on the 11.0.0 development line and uses `releases/v10` for 10.x maintenance, matching the branch naming in the GitHub Actions versioning example. The maintenance branch was created at the exact `v10.1.1` target, `5bd86483a104328783255960116c1fb87ce2b35d`, with identical tree content, and renamed from the provisional local `release/10` to `releases/v10`. The branch is now published in `codebeltnet/coverlet`, and [PR #9](https://github.com/codebeltnet/coverlet/pull/9) targets it. The existing active branch ruleset was extended to include `refs/heads/releases/v10`, preserving the same pull-request, deletion, and non-fast-forward protections without changing the default branch's rules.
+
+At inspection, `master` remains at `0e2e2fe394c2ea6343b9b228382f1dbd2ef165c3`, containing the earlier 11.0.0 work and ancestry-preserving upstream integration from PR #7. The existing `v11.0.0/double-digits-chore` branch, at `922b11cd71fccd97ce3fc8e369beb71fad4bb81d` and used by PR #8, contains that complete master history plus its subsequent work. Neither branch is reset, reverted, or rewritten by this maintenance preparation. Their detailed synchronization record remains in the 11.0.0 line's `UPSTREAM.md`.
+
+PR #9's 13 existing commits are the hotfix work based on `v10.1.1`; the newer upstream and .NET 11 commits are already in `master`, not additional hotfix commits. Against the selected maintenance base, the hotfix has no merge conflicts and retains the tested 10.1.1 package/framework baseline. The workflow filter is extended to accept `releases/v10` as well as `master`. Future 10.x fixes must be forward-ported to the 11.0.0 line separately; no forward-port, upstream adoption, package release, or publication is performed by this branch preparation.
+
+The existing manual workflow can run against `releases/v10` or a fixed release tag. The `Production` environment has no branch restriction and retains its required reviewer. A stable 10.1.2 release requires its fixed `v10.1.2` tag on the selected commit before the run; otherwise MinVer calculates a prerelease version. This setup does not create a release tag, approve deployment, or publish a package.
+
+The earlier [manual run 41717154404](https://github.com/codebeltnet/coverlet/actions/runs/41717154404), on hotfix commit `a06eac4b88f682bdc838472bfc4b9b488d13f076`, passed the build, release-version guard, and all six Windows/Ubuntu test jobs. Its three macOS jobs were cancelled without acquiring a runner. Their annotations report hosted-runner acquisition failure and macOS arm64 capacity constraints; no macOS test execution occurred. Packing, package validation, and publication were skipped because the test matrix did not complete successfully. This is a partial CI result caused by runner allocation, not evidence of a failing macOS test or successful package validation. Retain the macOS matrix and require a successful run before release.
+
 ## 2026-11-03: dependency exclusion correction for 10.1.2
 
 Operation date: 2026-11-03. This is a fork-local correction of inherited behavior, not an upstream merge. The hotfix comparison base is Codebelt `v10.1.1` (`5bd86483a104328783255960116c1fb87ce2b35d`).
