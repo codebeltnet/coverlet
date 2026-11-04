@@ -66,6 +66,36 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
+    [Fact]
+    public void Issue2058_ReleaseInstrumentation_BoundedExecution_RecordsBranchAndLineHits()
+    {
+      string path = Path.GetTempFileName();
+      try
+      {
+        FunctionExecutor.Run(async (string[] pathSerialize) =>
+        {
+          await TestInstrumentationHelper.Run<Issue2058>(instance =>
+          {
+            instance.TryFinally_DoWhileBackEdge_Bounded();
+            return Task.CompletedTask;
+          }, persistPrepareResultToFile: pathSerialize[0]);
+
+          return 0;
+        }, [path]);
+
+        CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
+        result.Document("Instrumentation.Issue2058.cs")
+            .Method("System.Void Coverlet.Core.CoverageSamples.Tests.Issue2058::TryFinally_DoWhileBackEdge_Bounded()")
+            .AssertLinesCovered((100, 2), (102, 2), (106, 1))
+            .AssertBranchesCovered((102, 0, 1), (102, 1, 1))
+            .ExpectedTotalNumberOfBranches(1);
+      }
+      finally
+      {
+        File.Delete(path);
+      }
+    }
+
     private static void AssertMethodHasBothBranchPaths(CoverageResult result, string methodName)
     {
       var branches = result.Document("Instrumentation.Issue2058.cs").Branches.Values
