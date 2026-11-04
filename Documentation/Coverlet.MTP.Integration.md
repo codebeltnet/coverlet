@@ -32,20 +32,31 @@ A sample project file looks like:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
-   <PropertyGroup>
-      <TargetFramework>net10.0</TargetFramework>
-      <OutputType>Exe</OutputType>
-      <!-- Enable Microsoft Testing Platform -->
-      <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
-      <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport> <!-- not required for .NET SDK 10 or later -->
-   </PropertyGroup>
-      <ItemGroup>
-      <!-- Use xunit.v3.mtp-v2 for MTP v2.x compatibility -->
-      <PackageReference Include="xunit.v3.mtp-v2" Version="3.2.1" />
-      <PackageReference Include="Microsoft.Testing.Platform" Version="2.2.1" />
-      <PackageReference Include="Codebelt.Coverlet.MTP" Version="CURRENT_VERSION" />
-   </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" Version="4.0.2" />
+    <PackageReference Include="xunit.v3.runner.console" Version="4.0.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="4.0.1" />
+    <PackageReference Include="Codebelt.Coverlet.MTP" Version="10.1.2" />
+  </ItemGroup>
 </Project>
+```
+
+In xUnit v3 4.x, `xunit.v3` includes MTP v2, so this example does not need a direct `Microsoft.Testing.Platform` reference. The console and Visual Studio runner references are optional for MTP coverage.
+
+With .NET SDK 10 or later, select MTP in the repository's `global.json`, keeping any existing SDK settings:
+
+```json
+{
+  "test": {
+    "runner": "Microsoft.Testing.Platform"
+  }
+}
 ```
 
 ### Basic Usage
@@ -62,7 +73,7 @@ Or using `dotnet test` with MTP enabled projects:
 dotnet test --coverlet
 ```
 
-After the test run, a `coverage.json` file containing the results will be generated in the current directory.
+By default, JSON and Cobertura reports are written to the test results directory (normally `TestResults`), with timestamped filenames.
 
 ## Command Line Options
 

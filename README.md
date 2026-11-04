@@ -46,15 +46,27 @@ Example test project:
     <TargetFramework>net10.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
-    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="xunit.v3.mtp-v2" Version="4.0.2" />
-    <PackageReference Include="Microsoft.Testing.Platform" Version="2.5.1" />
-    <PackageReference Include="Codebelt.Coverlet.MTP" Version="*" />
+    <PackageReference Include="xunit.v3" Version="4.0.2" />
+    <PackageReference Include="xunit.v3.runner.console" Version="4.0.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="4.0.1" />
+    <PackageReference Include="Codebelt.Coverlet.MTP" Version="10.1.2" />
   </ItemGroup>
 </Project>
+```
+
+In xUnit v3 4.x, `xunit.v3` includes MTP v2, so this example does not need a direct `Microsoft.Testing.Platform` reference. The console and Visual Studio runner references are optional for MTP coverage.
+
+With .NET SDK 10 or later, select MTP in the repository's `global.json`, keeping any existing SDK settings:
+
+```json
+{
+  "test": {
+    "runner": "Microsoft.Testing.Platform"
+  }
+}
 ```
 
 ## Usage
