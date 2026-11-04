@@ -76,28 +76,18 @@ namespace Coverlet.Core.Tests.Helpers
     [InlineData("ReportGenerator.Mtp", "[ReportGenerator.Mtp]*")]
     // Two segments — exact
     [InlineData("coverlet.core", "[coverlet.core]*")]
-    // Three segments — wildcard from third onwards
-    [InlineData("xunit.v3.mtp-v2", "[xunit.v3.*]*")]
-    [InlineData("xunit.runner.utility", "[xunit.runner.*]*")]
-    [InlineData("Microsoft.Testing.Platform", "[Microsoft.Testing.*]*")]
-    // Four segments — still uses first-two-segment prefix
-    [InlineData("Microsoft.Extensions.Configuration.Binder", "[Microsoft.Extensions.*]*")]
-    public void WhenToExcludeFilterThenReturnsCorrectPattern(string assemblyName, string expectedFilter)
-    {
-      string result = ProcessAssemblyHelper.ToExcludeFilter(assemblyName);
-
-      Assert.Equal(expectedFilter, result);
-    }
-
-    [Theory]
-    [InlineData("xunit", "[xunit]*")]
-    [InlineData("coverlet.core", "[coverlet.core]*")]
+    // Longer names must also match only the discovered assembly.
+    [InlineData("xunit.v3.core", "[xunit.v3.core]*")]
+    [InlineData("xunit.runner.utility", "[xunit.runner.utility]*")]
+    [InlineData("Microsoft.Testing.Platform", "[Microsoft.Testing.Platform]*")]
+    [InlineData("Microsoft.Extensions.Configuration.Binder", "[Microsoft.Extensions.Configuration.Binder]*")]
+    [InlineData("Codebelt.Extensions.Xunit", "[Codebelt.Extensions.Xunit]*")]
     [InlineData("Microsoft.Testing.Extensions.MSBuild", "[Microsoft.Testing.Extensions.MSBuild]*")]
     [InlineData("MSS.Tools.xUnit", "[MSS.Tools.xUnit]*")]
     [InlineData("MSS.Tools.xUnit-Runner", "[MSS.Tools.xUnit-Runner]*")]
-    public void WhenToExactExcludeFilterThenReturnsExactPattern(string assemblyName, string expectedFilter)
+    public void WhenToExcludeFilterThenReturnsCorrectPattern(string assemblyName, string expectedFilter)
     {
-      string result = ProcessAssemblyHelper.ToExactExcludeFilter(assemblyName);
+      string result = ProcessAssemblyHelper.ToExcludeFilter(assemblyName);
 
       Assert.Equal(expectedFilter, result);
     }
@@ -133,7 +123,7 @@ namespace Coverlet.Core.Tests.Helpers
     }
 
     [Fact]
-    public void WhenGetDepsJsonAssemblyNamesThenReturnsRuntimePackageNamesAndSkipsProjectLibraries()
+    public void WhenGetDepsJsonAssemblyNamesThenReturnsRuntimeAssemblyNamesAndSkipsProjectLibraries()
     {
       string testModuleDirectory = AppContext.BaseDirectory;
       string testAssemblyName = Path.GetFileNameWithoutExtension(typeof(ProcessAssemblyHelperTests).Assembly.Location);
@@ -141,6 +131,7 @@ namespace Coverlet.Core.Tests.Helpers
       IReadOnlyList<string> result = _sut.GetDepsJsonAssemblyNames(testModuleDirectory, testAssemblyName);
 
       Assert.NotEmpty(result);
+      Assert.Contains(typeof(FactAttribute).Assembly.GetName().Name!, result, StringComparer.OrdinalIgnoreCase);
       Assert.DoesNotContain(testAssemblyName, result, StringComparer.OrdinalIgnoreCase);
 
       var unique = new HashSet<string>(result, StringComparer.OrdinalIgnoreCase);

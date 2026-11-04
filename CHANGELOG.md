@@ -33,10 +33,26 @@ This major release adds .NET 11 support, removes the dedicated .NET 9 target, an
 ### Fixed
 
 - Prevent invalid IL from branch trampolines near exception-handler boundaries and optimized loop back-edges,
-- Use exact assembly-name exclusions for assemblies loaded in the MTP controller process, avoiding accidental exclusions of application assemblies with shared prefixes, and accept hyphens in assembly filters,
 - Instrument local functions when CompilerGeneratedAttribute or GeneratedCodeAttribute is excluded, while continuing to honor other configured exclusion attributes,
 - Resolve shared-framework assemblies when runtime directory names contain version suffixes,
 - Align pattern-matching branch assertions with the selected SDK's compiled output.
+
+## [10.1.2] - 2026-11-03
+
+This is a patch release that restores coverage for project assemblies accidentally matched by generated dependency exclusions and fixes a separate framework assembly-resolution failure reproduced with Cuemon on .NET Framework 4.8. The dependency-filter defect was first included in Codebelt 10.0.1; the facade-resolution defect has a separate, older upstream origin. Package identity, public APIs, dependency versions, and supported target frameworks are unchanged. Restored modules can change coverage totals and quality-gate outcomes.
+
+> [!WARNING]
+> Versions 10.0.1 through 10.1.1 can produce incomplete coverage while tests and CI pass. BenchmarkDotNet's historical 92.3% report measured only its tooling runner; the library modules were missing. Review expected modules and source files when regenerating coverage. See the [full advisory](Documentation/DependencyExclusionRegression.md) for affected configurations, upstream [PR #1946](https://github.com/coverlet-coverage/coverlet/pull/1946) and commit [`c502253`](https://github.com/coverlet-coverage/coverlet/commit/c5022539cfdf3c6246c2e49b7789d7e8e529ef47), historical CI evidence, and the separately traced .NET Framework instrumentation fix validated with Cuemon.
+
+### Changed
+
+- Document exact dependency discovery and retained xUnit build exclusions, with prominent coverage alerts, upstream provenance, affected-version analysis, and verified results for the seven reported consumer repositories and Cuemon on .NET Framework 4.8.
+
+### Fixed
+
+- Generate exclusion filters from the managed runtime assets, including RID-specific assemblies, declared by non-project libraries in `deps.json` instead of from package IDs, so dependencies no longer exclude project assemblies that merely share a name prefix; preserve project outputs also listed in SDK reference entries,
+- Accept hyphenated assembly names such as `[xunit.v3.mtp-v2]*` as valid exclude filters, and exclude the `xunit.abstractions`, `xunit.runner.visualstudio.testadapter`, `xunit.v3.runner.utility.netcore`, and `xunit.v3.runner.utility.netfx` build assets that the xUnit runner and VSTest adapter copy without `deps.json` runtime entries,
+- Keep the runtime `netstandard.dll` facade bound to its owning assembly resolver so forwarded enum types retain configured framework fallbacks during instrumentation; restore coverage for `Cuemon.Core`, `Cuemon.Kernel`, and `Cuemon.Extensions.Core` on .NET Framework 4.8, with regression coverage for optional enum metadata.
 
 ## [10.1.1] - 2026-10-20
 
@@ -131,7 +147,8 @@ This is a minor release focused on the Codebelt.Coverlet.MTP fork with narrowed 
 - .vscode/settings.json configuration,
 - .devcontainer legacy configuration.
 
-[11.0.0]: https://github.com/codebeltnet/coverlet/compare/v10.1.1...v11.0.0
+[11.0.0]: https://github.com/codebeltnet/coverlet/compare/v10.1.2...v11.0.0
+[10.1.2]: https://github.com/codebeltnet/coverlet/compare/v10.1.1...v10.1.2
 [10.1.1]: https://github.com/codebeltnet/coverlet/compare/v10.1.0...v10.1.1
 [10.1.0]: https://github.com/codebeltnet/coverlet/compare/v10.0.1...v10.1.0
 [10.0.1]: https://github.com/codebeltnet/coverlet/compare/v10.0.0...v10.0.1

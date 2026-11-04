@@ -21,8 +21,9 @@ namespace Coverlet.Core.Abstractions
     IReadOnlyList<string> GetLoadedAssemblyNames(string testAssemblyName);
 
     /// <summary>
-    /// Returns the simple assembly names of all non-project NuGet package entries
-    /// declared in the <c>*.deps.json</c> files located next to the test module.
+    /// Returns the simple assembly names from managed runtime assets of non-project libraries
+    /// declared in the <c>*.deps.json</c> files located next to the test module,
+    /// including RID-specific assets. Package IDs are not used as assembly names.
     /// These entries represent test-host infrastructure that is not yet loaded into
     /// the controller process when <see cref="GetLoadedAssemblyNames"/> is called.
     /// </summary>

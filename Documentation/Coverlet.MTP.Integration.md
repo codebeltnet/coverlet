@@ -10,6 +10,9 @@ More information is available here:
 
 `Codebelt.Coverlet.MTP` packages Coverlet's Microsoft Testing Platform integration while preserving the implementation assembly name `coverlet.MTP.dll` for extension discovery.
 
+> [!WARNING]
+> Versions 10.0.1 through 10.1.1 can omit project assemblies under default dependency exclusions when their assembly names share a generated prefix. The [10.1.2 coverage advisory](DependencyExclusionRegression.md) explains the correction, upstream origins, consumer validation, and the separate .NET Framework instrumentation fix validated with Cuemon. Existing high percentages or successful test runs do not establish that all expected modules were included.
+
 ## Supported Runtime Versions
 
 This package provides explicit dependency groups for:
@@ -92,7 +95,7 @@ dotnet exec <test-assembly.dll> --help
 | `--coverlet-file-prefix <prefix>` | Prefix for coverage report filenames to prevent overwrites when multiple test projects write to the same directory. When specified, files are named `<prefix>.coverage.<extension>` instead of `coverage.<extension>`. (default: `none`) |
 | `--coverlet-include <filter>` | Include assemblies matching filters (e.g., `[Assembly]Type`). Can be specified multiple times. (default: `none`) |
 | `--coverlet-include-directory <path>` | Include additional directories for sources. Can be specified multiple times. (default: `none`) |
-| `--coverlet-exclude <filter>` | Exclude assemblies matching filters (e.g., `[Assembly]Type`). Can be specified multiple times. User-specified filters are merged with defaults. (defaults: see "Default Exclusions Behavior" below) |
+| `--coverlet-exclude <filter>` | Exclude assemblies matching filters (e.g., `[Assembly]Type`). Can be specified multiple times. User-specified filters are merged with the permanent baseline; dynamic exclusions are skipped. (defaults: see "Default Exclusions Behavior" below) |
 | `--coverlet-exclude-by-file <pattern>` | Exclude source files matching glob patterns. Can be specified multiple times. (default: `none`) |
 | `--coverlet-exclude-by-attribute <attribute>` | Exclude methods/classes decorated with attributes. Can be specified multiple times. User-specified attributes are merged with defaults. (defaults: see "Default Exclusions Behavior" below) |
 | `--coverlet-include-test-assembly` | Include test assembly in coverage. (default: `false`) |
@@ -116,19 +119,18 @@ Coverlet.MTP applies sensible default exclusions to reduce noise in coverage rep
 
 **Command Line Defaults:**
 
-When using command line options **without** a configuration file, the following defaults are **automatically merged** with user-specified exclusions:
+When using command line options **without** a configuration file, the following baseline exclusions are **automatically merged** with user-specified exclusions:
 
-- **Default Exclude Filters:** `[coverlet.*]*`, `[Microsoft.VisualStudio.TestPlatform.*]*`, `[testhost*]*`
+- **Default Exclude Filters:** `[coverlet.*]*`, `[Microsoft.VisualStudio.TestPlatform.*]*`, `[testhost*]*`, `[ReportGenerator.*]*`
 - **Default Exclude by Attributes:** `ExcludeFromCodeCoverage`, `ExcludeFromCodeCoverageAttribute`, `GeneratedCodeAttribute`, `CompilerGeneratedAttribute`
 
-**Dynamic Exclude Filters (Runtime Discovery):**
+**Dynamic Exclude Filters (Dependency Discovery):**
 
-Coverlet.MTP also applies **dynamic exclusions** discovered at runtime from two sources:
+When neither `--coverlet-exclude` nor a configuration file supplies exclusions, Coverlet.MTP also discovers managed runtime assemblies from non-project libraries in the `*.deps.json` files next to the test module, including RID-specific runtime assets. Assemblies already loaded in the controller process are also excluded, except for the test assembly itself.
 
-- Runtime package/library names from `*.deps.json`
-- Assemblies already loaded in the controller process (for example build/test extensions that may lock files before instrumentation)
+Generated filters match exact assembly names, such as `[Example.Testing.Infrastructure]*`. Package IDs are resolved to their runtime assembly filenames instead of being generalized into namespace wildcards. A project assembly sharing a dependency's name prefix remains eligible for coverage. User-specified wildcard filters retain their normal matching behavior.
 
-`deps.json` entries continue to use wildcard normalization for resilient matching. Loaded-assembly entries use **exact assembly-name filters** to avoid broad prefix exclusions. For example, a loaded assembly `MSS.Tools.xUnit` is excluded as `[MSS.Tools.xUnit]*` (not `[MSS.Tools.*]*`), which prevents accidental exclusion of a SUT like `MSS.Tools.Markdown`.
+Default discovery also excludes the exact xUnit build asset names `xunit.abstractions`, `xunit.runner.visualstudio.testadapter`, `xunit.v3.runner.utility.netcore`, and `xunit.v3.runner.utility.netfx`. The xUnit runner and VSTest adapter copy these assets without declaring runtime entries in `deps.json`. These defaults are skipped with explicit exclusion filters or a configuration file.
 
 **Configuration File Behavior (Authoritative Mode):**
 
