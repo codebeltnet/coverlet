@@ -139,6 +139,8 @@ namespace Coverlet.Core.Tests.Helpers
     [InlineData("[*]Coverlet.Core*")]
     [InlineData("[coverlet.*]*")]
     [InlineData("[*]ClassLibrary1.Tests.*")]
+    [InlineData("[xunit.v3.mtp-v2]*")]
+    [InlineData("[Example.Testing.test-host]*")]
     public void TestIsValidFilterExpression(string pattern)
     {
       Assert.True(_instrumentationHelper.IsValidFilterExpression(pattern));
@@ -146,7 +148,7 @@ namespace Coverlet.Core.Tests.Helpers
 
     [Theory]
     [InlineData("[*]")]
-    [InlineData("[-]*")]
+    [InlineData("[!]*")]
     [InlineData("*")]
     [InlineData("][")]
     [InlineData(null)]
