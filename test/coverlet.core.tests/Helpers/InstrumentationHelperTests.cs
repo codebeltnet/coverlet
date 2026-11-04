@@ -247,6 +247,19 @@ namespace Coverlet.Core.Tests.Helpers
     }
 
     [Fact]
+    public void TestSelectModulesWithGeneratedHyphenatedAssemblyFilterExcludesExactModule()
+    {
+      string generatedFilter = ProcessAssemblyHelper.ToExcludeFilter("MSS.Tools.xUnit-Runner");
+
+      Assert.True(_instrumentationHelper.IsValidFilterExpression(generatedFilter));
+
+      string[] modules = new[] { "MSS.Tools.Markdown.dll", "MSS.Tools.xUnit-Runner.dll" };
+      IEnumerable<string> result = _instrumentationHelper.SelectModules(modules, Array.Empty<string>(), new[] { generatedFilter });
+
+      Assert.Equal(["MSS.Tools.Markdown.dll"], result);
+    }
+
+    [Fact]
     public void TestIsTypeExcludedWithoutFilter()
     {
       bool result = _instrumentationHelper.IsTypeExcluded("Module.dll", "a.b.Dto", new string[0]);

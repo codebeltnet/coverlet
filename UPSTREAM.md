@@ -9,12 +9,12 @@ The compatibility goal is to preserve upstream behavior within the retained surf
 | Item | Recorded state |
 | --- | --- |
 | Upstream | [`coverlet-coverage/coverlet`, `master`](https://github.com/coverlet-coverage/coverlet/tree/master) |
-| Latest reviewed upstream commit | [`2e0a852d3a0d9669d9c19445e366c69ccaaf6424`](https://github.com/coverlet-coverage/coverlet/commit/2e0a852d3a0d9669d9c19445e366c69ccaaf6424), dated 2026-10-27 |
-| Latest sync operation | 2026-11-01; normal upstream merge preserving the existing Codebelt tree |
-| Codebelt baseline | [`6e72c0c11523bf3d6baf3ca25c2a457ce547674e`](https://github.com/codebeltnet/coverlet/commit/6e72c0c11523bf3d6baf3ca25c2a457ce547674e), integrated by [PR #6](https://github.com/codebeltnet/coverlet/pull/6) on 2026-11-01 |
-| Upstream ancestry merge | [`d587f8ca285f0bf147fb933e14ed48dfff8a7490`](https://github.com/codebeltnet/coverlet/commit/d587f8ca285f0bf147fb933e14ed48dfff8a7490); first parent is the Codebelt baseline, second parent is the reviewed upstream tip |
-| Destination integration | [PR #7](https://github.com/codebeltnet/coverlet/pull/7) into `codebeltnet/coverlet:master` using a merge commit; its merge record supplies the authoritative destination commit and integration state. The 11.0.0 release entry remains a draft. |
-| Validation | [CI run 41267824916](https://github.com/codebeltnet/coverlet/actions/runs/41267824916) at `1ddc5ab8bb25e437ebd3207769023e88c4a035e5` passed build, release-version guard, all nine test jobs, packing, and all six package-validation jobs across .NET 10/11 and Linux, Windows, and macOS. Publication was skipped. The final documentation follow-up is also gated by the checks on PR #7. |
+| Latest reviewed upstream commit | [`f37bf3d1ea8795cc1bdc57b29ad2ec81d10c9f1a`](https://github.com/coverlet-coverage/coverlet/commit/f37bf3d1ea8795cc1bdc57b29ad2ec81d10c9f1a), dated 2026-11-03 |
+| Latest sync operation | 2026-11-03; selective upstream merge on `v11.0.0/double-digits-chore` |
+| Codebelt baseline | [`feef6ea0687684ecadc0bd147cc4d6a42f82f93f`](https://github.com/codebeltnet/coverlet/commit/feef6ea0687684ecadc0bd147cc4d6a42f82f93f) |
+| Upstream ancestry merge | [`d66c8f1`](https://github.com/codebeltnet/coverlet/commit/d66c8f1ec9222faa23a0bc64ce3d568bf783ca73) records the baseline as first parent and the reviewed upstream tip as second parent; the 2026-11-04 reconciliation below also retains the released 10.1.2 ancestry. |
+| Destination integration | [PR #8](https://github.com/codebeltnet/coverlet/pull/8) remains subject to maintainer review. Master already contains 10.1.2 through [PR #10](https://github.com/codebeltnet/coverlet/pull/10); the later upstream snapshot is not yet integrated or released. |
+| Validation | Windows Release solution build, package inspection, and all four retained test suites passed on .NET 10/11. Windows/Ubuntu reconciliation CI passed at `7a261c8`; macOS remains a manual opt-in. Exact outcomes and existing CI skips are recorded below. |
 
 ## Original marker and release tags
 
@@ -51,6 +51,27 @@ The `netstandard2.0` embedded tracker in `src/coverlet.template` is retained fro
 
 ## Synchronization history
 
+### 2026-11-04: reconcile PR #8 with the released 10.1.2 fixes
+
+Operation date: 2026-11-04. This combines this fork's own branches, without reviewing a newer upstream snapshot. [PR #8](https://github.com/codebeltnet/coverlet/pull/8) starts at `922b11cd71fccd97ce3fc8e369beb71fad4bb81d`; the incoming master is `9f8983fd74153cca8e66d3317068fdea3e6d4266`, which integrated the released 10.1.2 fixes through [PR #10](https://github.com/codebeltnet/coverlet/pull/10). Their comparison base is `0e2e2fe394c2ea6343b9b228382f1dbd2ef165c3`. The normal reconciliation merge [`7a261c8`](https://github.com/codebeltnet/coverlet/commit/7a261c816a57c7ab5c19ad10d6c4c0274170d38d) retains PR #8 as its first parent and master as its second parent, preserving both reviewed upstream snapshots and the `v10.1.2` release ancestry. Final integration into master remains subject to maintainer review through PR #8; no 11.0.0 release is performed.
+
+The six conflicts and all automatic merge results were reviewed individually. The resulting dependency discovery, generated filter path, filter validation, facade resolver, and real discovery/filter-application regressions are identical to master. In particular, upstream #2069's deps.json wildcard normalization is superseded by 10.1.2's exact managed runtime-asset discovery, including RID assets, project/reference precedence, and xUnit build assets. Its exact loaded-assembly behavior is retained through the same exact filter helper; the now-redundant `ToExactExcludeFilter` helper is removed, with its unique test cases moved to `ToExcludeFilter`. The loaded shared-prefix and hyphenated module-selection regressions remain. Explicit wildcard filters and authoritative configuration files retain their existing behavior.
+
+PR #8's exception-handler-aware instrumentation and four Issue 2058 JIT-preparation regressions are unchanged. Microsoft Testing Platform remains at 2.5.2. Master's .NET 11 SDK, `netstandard2.0;net10.0;net11.0` targets, remaining dependency pins, validation infrastructure, maintenance release workflow, and manual macOS opt-in are retained. The changelog keeps the 10.1.2 advisory and release history; exact filtering is no longer listed as a separate new 11.0.0 fix. The original synchronization entries below remain as historical records.
+
+Local validation uses Windows x64 and SDK `11.0.100-rc.3.26522.148`. `dotnet build coverlet.slnx -c Release -p:PrepareValidationPackage=false` passed with zero warnings/errors, including .NET Standard 2.0. Tests use `dotnet test --project test/<project>/<project>.csproj --framework <net10.0|net11.0> --configuration Release --report-trx --results-directory <external-evidence-directory>`, with `--no-build` for the core, MTP and instrumentation suites. Package-validation framework legs run sequentially and prepare isolated packages. Results:
+
+| Project | .NET 10 | .NET 11 |
+| --- | --- | --- |
+| `coverlet.core.tests` | 378 passed, 9 platform skips | 378 passed, 9 platform skips |
+| `coverlet.MTP.tests` | 440 passed, 7 platform skips | 440 passed, 7 platform skips |
+| `coverlet.core.coverage.tests` | 102 passed, no skips | 102 passed, no skips |
+| `coverlet.MTP.validation.tests` | 45 passed, no skips | 45 passed, no skips |
+
+The eight runs total 1,930 passed, 32 platform skips, and zero failures. Both package suites executed all 45 tests, including help/info checks skipped by the existing Release CI guard. All four Issue 2058 regressions passed on each runtime. Package inspection confirmed `Codebelt.Coverlet.MTP`, retained MTP/core assembly identities, all three framework/dependency groups, existing runtime pins/compatibility overrides, and MTP 2.5.2. Before committing the reconciliation merge, MinVer calculated `10.1.2-alpha.0.6` because the incoming release ancestry was not yet part of HEAD; no tag or version policy was changed. .NET Standard 2.0 was built and packed, not executed. These are local Windows results; PR #8 records destination CI outcomes, with macOS remaining a manual opt-in. No consumer repository-wide coverage rerun or 11.0.0 publication is claimed.
+
+Cross-platform validation: [CI run 41845532478](https://github.com/codebeltnet/coverlet/actions/runs/41845532478) completed successfully for source `7a261c816a57c7ab5c19ad10d6c4c0274170d38d`. All 13 selected build, version-guard, Windows/Ubuntu test, pack, and .NET 10/11 package-validation jobs passed; publication was skipped for the PR. GitHub's proposed merge tree matched the locally validated tree. The 12 downloaded core/MTP/instrumentation TRX reports confirm that the real dependency-discovery, forwarded-enum resolver, loaded-prefix, hyphenated module-selection, and all four Issue 2058 regressions passed on both runtimes on both operating systems. Existing platform skips and the Release CI help/info skip guard remain; the full local package suites above cover those help/info checks. macOS was not selected under the approved opt-in workflow. PR #8 remains open for review with auto-merge disabled; this validation does not integrate it into master or publish 11.0.0.
+
 ### 2026-11-04: integrate the 10.1.2 maintenance fixes into 11.0.0
 
 Operation date: 2026-11-04, following preparation and local validation on 2026-11-03. This is a merge between this fork's own release lines, not a new upstream synchronization. The destination baseline is `master` at `0e2e2fe394c2ea6343b9b228382f1dbd2ef165c3`; the maintenance source is `releases/v10` at `373d6a26b8662fb83c9059a90a3d14bc331025aa`, the verified `v10.1.2` tag target produced by [PR #9](https://github.com/codebeltnet/coverlet/pull/9). The common base is Codebelt `v10.1.1`, `5bd86483a104328783255960116c1fb87ce2b35d`. The normal merge retains master as its first parent and that maintenance source as its second parent.
@@ -71,6 +92,50 @@ Local validation used Windows x64 and SDK `11.0.100-rc.3.26522.148`. The Release
 | `coverlet.MTP.validation.tests` | 45 passed, no skips | 45 passed, no skips |
 
 The total is 1,912 passed, 32 platform skips, and zero failures. These are local Windows results, not evidence of destination Linux/macOS execution. Read-only comparisons verified that master's SDK, dependencies, framework declarations, upstream instrumentation ports, and validation infrastructure are unchanged, while the maintenance discovery/resolver corrections and regression tests are present. Remote integration must preserve the merge ancestry; use a merge commit rather than squash or rebase.
+
+Integration completed through [PR #10](https://github.com/codebeltnet/coverlet/pull/10) at `9f8983fd74153cca8e66d3317068fdea3e6d4266`, with a tree identical to the tested source `33c05e0092924dba510d0f0c558eb9d4aea30e08`. [CI run 41786504381](https://github.com/codebeltnet/coverlet/actions/runs/41786504381) passed the selected Windows/Ubuntu test, build, pack, and .NET 10/11 package-validation jobs; publication was skipped for the PR. macOS was not selected under the maintainer-approved opt-in workflow. These final outcomes supersede the preparation-state pending statements above.
+
+### 2026-11-03: exception-handler instrumentation and dynamic exclusion fixes
+
+Operation date: 2026-11-03. Reviewed `coverlet-coverage/coverlet:master` at [`f37bf3d1ea8795cc1bdc57b29ad2ec81d10c9f1a`](https://github.com/coverlet-coverage/coverlet/commit/f37bf3d1ea8795cc1bdc57b29ad2ec81d10c9f1a), fetched without tags. The shared comparison base is [`1d9db3aacfbf61e1b2b4d9190715a13ba694d8c9`](https://github.com/coverlet-coverage/coverlet/commit/1d9db3aacfbf61e1b2b4d9190715a13ba694d8c9); the requested branch baseline is `feef6ea0687684ecadc0bd147cc4d6a42f82f93f`. At the maintainer's explicit request this synchronization targets the existing `v11.0.0/double-digits-chore` branch, rather than starting a new branch from or integrating into `master`.
+
+| Upstream source | Disposition |
+| --- | --- |
+| [`483ff5a`, #2067](https://github.com/coverlet-coverage/coverlet/commit/483ff5ac667a2d20fc4f3976251aa8f5335cc9ba) | Adopt exception-handler-aware branch trampolines, local trampoline fallback, stable iteration over original IL, and Issue 2058 regression coverage/samples. Preserve the fork's solution layout. Exclude upstream-only ILVerify tool manifests, legacy pipeline/tool configuration, and Copilot instruction edits. |
+| [`345b63c`, #2068](https://github.com/coverlet-coverage/coverlet/commit/345b63cc18abe9587e353e75f882b59cbf3e372f) | Translate the adopted instrumentation fix into the root changelog; omit upstream release headings and removed package identities. |
+| [`f37bf3d`, #2069](https://github.com/coverlet-coverage/coverlet/commit/f37bf3d1ea8795cc1bdc57b29ad2ec81d10c9f1a) | Adopt exact assembly-name filters for loaded controller assemblies, retain wildcard normalization for deps.json entries, accept hyphens in filters, and adopt corresponding core/MTP tests and retained MTP usage documentation. Translate release notes into the root changelog. |
+
+The dependency-filter disposition above records the original 2026-11-03 merge. The 2026-11-04 reconciliation below supersedes its deps.json wildcard normalization with the released 10.1.2 exact runtime-asset discovery while retaining exact loaded-assembly behavior.
+
+All three incoming commits were reviewed; none was already present. Production and test changes match the reviewed upstream changes, including the .NET Standard trampoline compatibility path. The four modified/deleted or content-conflicted paths and all automatic merge results were reviewed individually. Removed tool manifests, legacy projects/pipelines, upstream changelog and versioning remain excluded. Codebelt package/assembly identities, `netstandard2.0;net10.0;net11.0`, runtime pins, MinVer `v*` tags, and release guards are preserved.
+
+Validation on Windows with SDK `11.0.100-rc.3.26522.148`: `dotnet build coverlet.slnx -c Release -p:PrepareValidationPackage=true` succeeded with zero warnings/errors. Core and MTP compiled for .NET Standard 2.0, .NET 10 and .NET 11; isolated validation packages were created for the .NET 10/11 consumer tests. Inspection of both packages confirmed `Codebelt.Coverlet.MTP`, `coverlet.MTP.dll`, all three framework/dependency groups, the existing runtime pins and compatibility overrides, and Microsoft.Testing.Platform 2.5.2. MinVer calculated `10.1.2-alpha.0.4` before this merge commit; its configuration and release guards are unchanged and the guards were not executed locally.
+
+With explicit approval, Release tests ran with `dotnet test test/<project>/<project>.csproj -c Release -f <net10.0|net11.0> --no-build -p:PrepareValidationPackage=false -- --report-trx --report-trx-filename <project>.<framework>.sync-20261103.trx`. All eight runs passed; package-validation framework runs were sequential to avoid shared generated-project directories.
+
+| Project | .NET 10 | .NET 11 |
+| --- | --- | --- |
+| `coverlet.core.tests` | 374 passed, 9 skipped | 374 passed, 9 skipped |
+| `coverlet.core.coverage.tests` | 102 passed, none skipped | 102 passed, none skipped |
+| `coverlet.MTP.tests` | 434 passed, 7 skipped | 434 passed, 7 skipped |
+| `coverlet.MTP.validation.tests` | 45 passed, none skipped | 45 passed, none skipped |
+
+Skips require Linux or macOS. The four Issue 2058 JIT-preparation regressions passed on each runtime. .NET Standard 2.0 was built and packed, not executed as a test target. The normal merge carrying this entry records the branch baseline first and the pinned upstream tip second; the reviewed tip is an ancestor of the resulting branch with zero commits on the upstream side of its comparison. Destination integration into `master` and Linux/Windows/macOS CI remain pending; this operation neither releases nor publishes a package.
+
+### 2026-11-01: Microsoft Testing Platform patch update
+
+Reviewed `coverlet-coverage/coverlet:master` at [`1d9db3a`](https://github.com/coverlet-coverage/coverlet/commit/1d9db3aacfbf61e1b2b4d9190715a13ba694d8c9), compared from shared base [`2e0a852`](https://github.com/coverlet-coverage/coverlet/commit/2e0a852d3a0d9669d9c19445e366c69ccaaf6424). The requested branch started at `0e2e2fe394c2ea6343b9b228382f1dbd2ef165c3`. This normal merge records the four reviewed commits in ancestry; that does not adopt their excluded files.
+
+| Upstream source | Disposition |
+| --- | --- |
+| [`1d9db3a`, #2066](https://github.com/coverlet-coverage/coverlet/commit/1d9db3aacfbf61e1b2b4d9190715a13ba694d8c9) | Adopt the shared Microsoft Testing Platform version update from 2.5.1 to 2.5.2 for the retained package and test dependencies, preserving the fork's central version layout. |
+| [`b0b4190`, #2062](https://github.com/coverlet-coverage/coverlet/commit/b0b4190c995017d28c8b2cca5cad4f2d919591ff) | Omit the update to the removed upstream dotnet tool manifest. The separate `ReportGenerator.Core` test dependency was not changed upstream. |
+| [`98d291d`, #2061](https://github.com/coverlet-coverage/coverlet/commit/98d291d713dde46a58ee1dcf7ce832bdf6c2b781) | Omit the update to the removed upstream CI workflow. |
+| [`ea74a47`, #2060](https://github.com/coverlet-coverage/coverlet/commit/ea74a473c5c0f5ef7dffb425584da9a72a1769dd) | Omit the update to the removed upstream CodeQL workflow. |
+
+The five centrally versioned Microsoft Testing Platform packages were verified at 2.5.2 via `dotnet package search`. On Windows with SDK `11.0.100-rc.3.26522.148`, solution restore and Release build with `PrepareValidationPackage=false` succeeded; the build had zero warnings and errors and compiled core and MTP for .NET Standard 2.0, .NET 10 and .NET 11. `dotnet pack` succeeded, and package inspection confirmed `Codebelt.Coverlet.MTP`, all three framework groups, their existing runtime pins and compatibility overrides, and Microsoft.Testing.Platform 2.5.2. MinVer calculated `10.1.2-alpha.0.3` before the merge commit. The release workflow guards were unchanged and were not executed locally. No release or publication was performed.
+
+With approval, Windows Release tests passed against the merged source `feef6ea0687684ecadc0bd147cc4d6a42f82f93f`. For each of .NET 10 and .NET 11: `coverlet.core.tests` passed 369 and skipped 9; `coverlet.core.coverage.tests` passed 98; `coverlet.MTP.tests` passed 433 and skipped 7; and `coverlet.MTP.validation.tests` passed 45. Skips were platform-specific tests for Linux or macOS. The validation projects were rebuilt with `PrepareValidationPackage=true`, creating isolated packages at version `10.1.2-alpha.0.4`; their framework runs were sequential. .NET Standard 2.0 was built and packed, not executed as a test target. The Linux/Windows/macOS CI matrix remains required before integration.
 
 ### 2026-11-01: retain reviewed upstream ancestry without runtime changes
 

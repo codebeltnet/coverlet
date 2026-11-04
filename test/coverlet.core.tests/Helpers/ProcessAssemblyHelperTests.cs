@@ -82,6 +82,9 @@ namespace Coverlet.Core.Tests.Helpers
     [InlineData("Microsoft.Testing.Platform", "[Microsoft.Testing.Platform]*")]
     [InlineData("Microsoft.Extensions.Configuration.Binder", "[Microsoft.Extensions.Configuration.Binder]*")]
     [InlineData("Codebelt.Extensions.Xunit", "[Codebelt.Extensions.Xunit]*")]
+    [InlineData("Microsoft.Testing.Extensions.MSBuild", "[Microsoft.Testing.Extensions.MSBuild]*")]
+    [InlineData("MSS.Tools.xUnit", "[MSS.Tools.xUnit]*")]
+    [InlineData("MSS.Tools.xUnit-Runner", "[MSS.Tools.xUnit-Runner]*")]
     public void WhenToExcludeFilterThenReturnsCorrectPattern(string assemblyName, string expectedFilter)
     {
       string result = ProcessAssemblyHelper.ToExcludeFilter(assemblyName);

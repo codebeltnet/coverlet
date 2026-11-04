@@ -19,7 +19,7 @@ This major release adds .NET 11 support, removes the dedicated .NET 9 target, an
 - Target .NET 10 and .NET 11 alongside .NET Standard 2.0, with runtime dependency versions selected per target framework,
 - Preserve reviewed upstream history through merge ancestry while retaining selective Codebelt file integration; the 2026-11-01 synchronization through `2e0a852` changes no production code, dependencies, or package layout,
 - Exclude unreachable branches from branch coverage totals and from Cobertura, LCOV, and OpenCover branch details,
-- Update Microsoft Testing Platform to 2.5.1, Microsoft.NET.Test.Sdk to 18.11.0, xunit.v3.mtp-v2 to 4.0.2, xunit.runner.visualstudio to 4.0.1, Moq to 4.21.0, and LinqKit.Microsoft.EntityFrameworkCore to 10.1.1,
+- Update Microsoft Testing Platform to 2.5.2, Microsoft.NET.Test.Sdk to 18.11.0, xunit.v3.mtp-v2 to 4.0.2, xunit.runner.visualstudio to 4.0.1, Moq to 4.21.0, and LinqKit.Microsoft.EntityFrameworkCore to 10.1.1,
 - Update NuGet.Packaging and NuGet.Versioning to 7.9.0, retaining a NuGet.Versioning 6.14.3 override for .NET Standard 2.0,
 - Change the validation tests to read the package folder from MSBuild metadata instead of a hard-coded `artifacts/package/<configuration>` path, with missing-package guidance that points to `-p:PrepareValidationPackage=true` or an existing package,
 - Disable automatic package preparation in GitHub Actions so validation consumes the downloaded release package, while allowing opt-out outside GitHub Actions with `-p:PrepareValidationPackage=false`,
@@ -32,6 +32,7 @@ This major release adds .NET 11 support, removes the dedicated .NET 9 target, an
 
 ### Fixed
 
+- Prevent invalid IL from branch trampolines near exception-handler boundaries and optimized loop back-edges,
 - Instrument local functions when CompilerGeneratedAttribute or GeneratedCodeAttribute is excluded, while continuing to honor other configured exclusion attributes,
 - Resolve shared-framework assemblies when runtime directory names contain version suffixes,
 - Align pattern-matching branch assertions with the selected SDK's compiled output.
