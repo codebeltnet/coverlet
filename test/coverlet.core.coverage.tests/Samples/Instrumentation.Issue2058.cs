@@ -25,6 +25,27 @@ namespace Coverlet.Core.CoverageSamples.Tests
       }
     }
 
+    public void WhileTrue_IfThenTryFinally_Bounded(System.Action onIteration)
+    {
+      while (true)
+      {
+        if (_n > 0)
+        {
+          _n--;
+        }
+
+        try
+        {
+          _n++;
+          onIteration();
+        }
+        finally
+        {
+          _n++;
+        }
+      }
+    }
+
     public void WhileTrue_TryFinallyIfTryFinally()
     {
       while (true)
@@ -88,22 +109,6 @@ namespace Coverlet.Core.CoverageSamples.Tests
       finally
       {
         Cleanup();
-      }
-    }
-
-    public void TryFinally_DoWhileBackEdge_Bounded()
-    {
-      try
-      {
-        do
-        {
-          _n++;
-        }
-        while (_n < 2);
-      }
-      finally
-      {
-        _n++;
       }
     }
 
