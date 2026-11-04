@@ -131,9 +131,7 @@ internal sealed class CoverageConfiguration
       return _configFileSettings.ExcludeFilters;
     }
 
-    // Priority 3: Dynamic defaults derived from the assemblies already loaded into this
-    // process. Because only loaded assemblies are inspected, transitive dependencies that
-    // have not yet been resolved are never included in the list.
+    // Priority 3: Dynamic defaults from dependency runtime assets and loaded assemblies.
     string[] dynamicDefaults = BuildDynamicExcludeFilters();
     LogOptionValue(CoverletOptionNames.Exclude, dynamicDefaults, isExplicit: false);
     return dynamicDefaults;
@@ -146,7 +144,8 @@ internal sealed class CoverageConfiguration
   ///   <item>
   ///     <description>
   ///       <b>deps.json</b> — reads <c>*.deps.json</c> next to the test module and converts
-  ///       every non-project <c>RuntimeLibrary</c> entry into a filter pattern.  Covers
+  ///       managed runtime assets of non-project <c>RuntimeLibrary</c> entries into exact
+  ///       assembly filters. Covers
   ///       test-host infrastructure (e.g. <c>xunit.v3.mtp-v2</c>, <c>testhost</c>,
   ///       <c>Microsoft.TestPlatform.*</c>) that is only loaded inside the test-host process,
   ///       not in the controller process where instrumentation runs.
@@ -187,13 +186,12 @@ internal sealed class CoverageConfiguration
       // such as Microsoft.Testing.Extensions.MSBuild that are held open before instrumentation).
       IReadOnlyList<string> loadedNames = _processAssemblyHelper.GetLoadedAssemblyNames(simpleTestName);
 
-      IEnumerable<string> depsFilters = depsNames
+      // xUnit's runner and VSTest adapter copy these build assets without declaring
+      // runtime entries in deps.json. Keep their infrastructure exclusions exact as well.
+      IEnumerable<string> dynamicFilters = depsNames.Concat(loadedNames)
+        .Concat(["xunit.abstractions", "xunit.runner.visualstudio.testadapter",
+          "xunit.v3.runner.utility.netcore", "xunit.v3.runner.utility.netfx"])
         .Select(Coverlet.Core.Helpers.ProcessAssemblyHelper.ToExcludeFilter);
-
-      IEnumerable<string> loadedFilters = loadedNames
-        .Select(Coverlet.Core.Helpers.ProcessAssemblyHelper.ToExactExcludeFilter);
-
-      IEnumerable<string> dynamicFilters = depsFilters.Concat(loadedFilters);
 
       IEnumerable<string> merged = s_baselineExcludeFilters
         .Concat(dynamicFilters)
