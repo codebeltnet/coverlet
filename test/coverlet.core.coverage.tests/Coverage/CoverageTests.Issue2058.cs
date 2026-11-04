@@ -76,7 +76,20 @@ namespace Coverlet.CoreCoverage.Tests
         {
           await TestInstrumentationHelper.Run<Issue2058>(instance =>
           {
-            instance.TryFinally_DoWhileBackEdge_Bounded();
+            int iterations = 0;
+            Action onIteration = () =>
+            {
+              if (++iterations == 2)
+              {
+                throw new InvalidOperationException();
+              }
+            };
+            Action execute = () =>
+            {
+              instance.WhileTrue_IfThenTryFinally_Bounded(onIteration);
+            };
+            Exception exception = Record.Exception(execute);
+            Assert.True(exception is InvalidOperationException, $"Expected the callback to stop execution. Actual exception: {exception}");
             return Task.CompletedTask;
           }, persistPrepareResultToFile: pathSerialize[0]);
 
@@ -85,9 +98,9 @@ namespace Coverlet.CoreCoverage.Tests
 
         CoverageResult result = TestInstrumentationHelper.GetCoverageResult(path);
         result.Document("Instrumentation.Issue2058.cs")
-            .Method("System.Void Coverlet.Core.CoverageSamples.Tests.Issue2058::TryFinally_DoWhileBackEdge_Bounded()")
-            .AssertLinesCovered((100, 2), (102, 2), (106, 1))
-            .AssertBranchesCovered((102, 0, 1), (102, 1, 1))
+            .Method("System.Void Coverlet.Core.CoverageSamples.Tests.Issue2058::WhileTrue_IfThenTryFinally_Bounded(System.Action)")
+            .AssertLinesCovered((32, 2), (34, 1), (39, 2), (44, 2))
+            .AssertBranchesCovered((32, 0, 1), (32, 1, 1))
             .ExpectedTotalNumberOfBranches(1);
       }
       finally
