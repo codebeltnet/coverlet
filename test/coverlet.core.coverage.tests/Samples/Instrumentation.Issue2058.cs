@@ -91,6 +91,22 @@ namespace Coverlet.Core.CoverageSamples.Tests
       }
     }
 
+    public void TryFinally_DoWhileBackEdge_Bounded()
+    {
+      try
+      {
+        do
+        {
+          _n++;
+        }
+        while (_n < 2);
+      }
+      finally
+      {
+        _n++;
+      }
+    }
+
     private void Tick()
     {
       _n++;
