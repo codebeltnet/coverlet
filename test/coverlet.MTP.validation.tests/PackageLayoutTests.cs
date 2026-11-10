@@ -64,9 +64,9 @@ public class PackageLayoutTests : MtpValidationTestBase
 
     Assert.Equal(s_supportedTfms.Order(StringComparer.OrdinalIgnoreCase), dependencyGroups.Keys.Order(StringComparer.OrdinalIgnoreCase));
 
-    AssertDependency(dependencyGroups["netstandard2.0"], "Microsoft.Extensions.Configuration", "8.0.0");
-    AssertDependency(dependencyGroups["netstandard2.0"], "Microsoft.Extensions.Configuration.Json", "8.0.1");
-    AssertDependency(dependencyGroups["netstandard2.0"], "Microsoft.Extensions.DependencyInjection", "8.0.1");
+    AssertDependency(dependencyGroups["netstandard2.0"], "Microsoft.Extensions.Configuration", MtpPackageVersions.MicrosoftNet10Runtime);
+    AssertDependency(dependencyGroups["netstandard2.0"], "Microsoft.Extensions.Configuration.Json", MtpPackageVersions.MicrosoftNet10Runtime);
+    AssertDependency(dependencyGroups["netstandard2.0"], "Microsoft.Extensions.DependencyInjection", MtpPackageVersions.MicrosoftNet10Runtime);
     AssertDependency(dependencyGroups["netstandard2.0"], "Microsoft.Testing.Platform", MtpPackageVersions.MicrosoftTestingPlatform);
     AssertDependency(dependencyGroups["netstandard2.0"], "System.Buffers", "4.6.1");
     AssertDependency(dependencyGroups["netstandard2.0"], "System.Memory", "4.6.3");

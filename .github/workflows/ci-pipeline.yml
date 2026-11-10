@@ -20,7 +20,6 @@ jobs:
     with:
       projects: coverlet.slnx
       configuration: Release
-      include-preview: true
       upload-build-artifact-name: build-release
       timeout-minutes: 45
 
@@ -71,7 +70,6 @@ jobs:
       configuration: Release
       build: true
       restore: true
-      include-preview: true
       download-pattern: build-release
       timeout-minutes: 45
 
@@ -83,7 +81,6 @@ jobs:
       projects: src/coverlet.MTP/coverlet.MTP.csproj
       configuration: Release
       version: ${{ needs.build.outputs.version }}
-      include-preview: true
       download-build-artifact-pattern: build-release
       upload-packed-artifact-name: NuGet-Release
       timeout-minutes: 30
@@ -106,8 +103,6 @@ jobs:
 
       - name: Install .NET
         uses: codebeltnet/install-dotnet@v3
-        with:
-          includePreview: true
 
       - name: Download validated package
         uses: actions/download-artifact@v8

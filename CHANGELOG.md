@@ -16,10 +16,13 @@ This major release adds .NET 11 support, removes the dedicated .NET 9 target, an
 
 ### Changed
 
-- Target .NET 10 and .NET 11 alongside .NET Standard 2.0, with runtime dependency versions selected per target framework,
+- Target .NET 10 and .NET 11 alongside .NET Standard 2.0, with Microsoft runtime dependencies aligned to 10.0.15 for .NET 10 and .NET Standard 2.0 and 11.0.0 for .NET 11,
+- Use .NET 10 versions of Microsoft.Extensions.FileSystemGlobbing, Microsoft.Extensions.DependencyModel, Microsoft.Extensions.DependencyInjection, Microsoft.Extensions.Configuration, Microsoft.Extensions.Configuration.Json, System.Security.Cryptography.Pkcs, and System.Text.Json for the .NET Standard 2.0 package assets instead of .NET 8 overrides,
+- Update the .NET Standard test sample's Microsoft.Bcl.AsyncInterfaces dependency to 10.0.15,
+- Pin the .NET 11.0.100 SDK and stop opting into preview SDK installation in CI,
 - Preserve reviewed upstream history through merge ancestry while retaining selective Codebelt file integration; the 2026-11-01 synchronization through `2e0a852` changes no production code, dependencies, or package layout,
 - Exclude unreachable branches from branch coverage totals and from Cobertura, LCOV, and OpenCover branch details,
-- Update Microsoft Testing Platform to 2.5.2, Microsoft.NET.Test.Sdk to 18.11.0, xunit.v3.mtp-v2 to 4.0.2, xunit.runner.visualstudio to 4.0.1, Moq to 4.21.0, and LinqKit.Microsoft.EntityFrameworkCore to 10.1.1,
+- Update Microsoft Testing Platform to 2.5.2, Microsoft.NET.Test.Sdk to 18.11.0, xunit.v3.mtp-v2 to 4.0.3, xunit.runner.visualstudio to 4.0.1, Moq to 4.21.0, LinqKit.Microsoft.EntityFrameworkCore to 10.1.1, and ReportGenerator.Core to 5.5.12,
 - Update NuGet.Packaging and NuGet.Versioning to 7.9.0, retaining a NuGet.Versioning 6.14.3 override for .NET Standard 2.0,
 - Change the validation tests to read the package folder from MSBuild metadata instead of a hard-coded `artifacts/package/<configuration>` path, with missing-package guidance that points to `-p:PrepareValidationPackage=true` or an existing package,
 - Disable automatic package preparation in GitHub Actions so validation consumes the downloaded release package, while allowing opt-out outside GitHub Actions with `-p:PrepareValidationPackage=false`,
