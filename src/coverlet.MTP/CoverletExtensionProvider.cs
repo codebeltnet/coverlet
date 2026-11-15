@@ -11,8 +11,17 @@ using Microsoft.Testing.Platform.Services;
 
 namespace Coverlet.MTP;
 
+/// <summary>
+/// Registers controller instrumentation, test-host coverage flushing and coverage command-line options with MTP.
+/// </summary>
 public static class CoverletExtensionProvider
 {
+  /// <summary>
+  /// Adds the complete Coverlet coverage integration to a custom test application builder.
+  /// </summary>
+  /// <param name="builder">The builder to configure before constructing the test application.</param>
+  /// <param name="ignoreIfNotSupported">Reserved for compatibility. This parameter is currently ignored.</param>
+  /// <remarks>Register once. Package-generated discovery normally calls this through <see cref="TestingPlatformBuilderHook"/>.</remarks>
   public static void AddCoverletExtensionProvider(this ITestApplicationBuilder builder, bool ignoreIfNotSupported = false)
   {
     // ============================================================

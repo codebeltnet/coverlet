@@ -5,6 +5,9 @@ using Microsoft.Testing.Platform.Builder;
 
 namespace Coverlet.MTP
 {
+  /// <summary>
+  /// Connects MTP package discovery to the complete Coverlet extension registration.
+  /// </summary>
   public static class TestingPlatformBuilderHook
   {
     /// <summary>
