@@ -327,3 +327,13 @@ dotnet-install.sh
 /test/coverlet.MTP.validation.tests/TestProjects/BasicTestProject/.packages/
 /test/coverlet.MTP.validation.tests/TestProjects/BasicTestProject/MTPTest.props
 /test/coverlet.MTP.validation.tests/TestProjects/BasicTestProject/NuGet.config
+
+# Generated DocFX metadata and site (authored overwrites remain tracked)
+/.docfx/api/*.yml
+/.docfx/api/.manifest
+/.docfx/api/*.manifest
+/.docfx/wwwroot/
+
+# Authored package documentation is not a restored NuGet packages directory.
+!/.docfx/packages/
+!/.docfx/packages/*.md

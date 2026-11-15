@@ -1,0 +1,1 @@
+Availability: .NET 11, .NET 10 and .NET Standard 2.0

@@ -102,6 +102,10 @@ Common options:
 
 See [Coverlet.MTP.Integration.md](Documentation/Coverlet.MTP.Integration.md) for the full MTP option reference and configuration-file behavior.
 
+The [DocFX documentation](.docfx/index.md) provides public API guidance, namespace overviews and compiling integration examples. Build it locally with `docfx .docfx/docfx.json`; the site is generated in `.docfx/wwwroot`.
+
+The Codebelt container workflow is available through `pwsh .docfx/BuildDocfxImage.ps1` and `pwsh .docfx/PublishDocfxImage.ps1`. The first builds a local multi-platform documentation image; the second explicitly pushes that image to the Codebelt registry. See the [documentation build instructions](.docfx/index.md#build-this-documentation) for prerequisites.
+
 ## Upstream relationship
 
 This fork is based on [coverlet-coverage/coverlet](https://github.com/coverlet-coverage/coverlet). The intent is not to replace Coverlet or rewrite its instrumentation internals; the fork exists to provide explicit target-framework support and NuGet dependency groups for the Microsoft Testing Platform package.
