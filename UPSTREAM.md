@@ -9,12 +9,12 @@ The compatibility goal is to preserve upstream behavior within the retained surf
 | Item | Recorded state |
 | --- | --- |
 | Upstream | [`coverlet-coverage/coverlet`, `master`](https://github.com/coverlet-coverage/coverlet/tree/master) |
-| Latest reviewed upstream commit | [`f37bf3d1ea8795cc1bdc57b29ad2ec81d10c9f1a`](https://github.com/coverlet-coverage/coverlet/commit/f37bf3d1ea8795cc1bdc57b29ad2ec81d10c9f1a), dated 2026-11-03 |
-| Latest sync operation | 2026-11-03; selective upstream merge on `v11.0.0/double-digits-chore` |
-| Codebelt baseline | [`feef6ea0687684ecadc0bd147cc4d6a42f82f93f`](https://github.com/codebeltnet/coverlet/commit/feef6ea0687684ecadc0bd147cc4d6a42f82f93f) |
-| Upstream ancestry merge | [`d66c8f1`](https://github.com/codebeltnet/coverlet/commit/d66c8f1ec9222faa23a0bc64ce3d568bf783ca73) records the baseline as first parent and the reviewed upstream tip as second parent; the 2026-11-04 reconciliation below also retains the released 10.1.2 ancestry. |
-| Destination integration | [PR #8](https://github.com/codebeltnet/coverlet/pull/8) remains subject to maintainer review. Master already contains 10.1.2 through [PR #10](https://github.com/codebeltnet/coverlet/pull/10); the later upstream snapshot is not yet integrated or released. |
-| Validation | Windows Release solution build, package inspection, and all four retained test suites passed on .NET 10/11. Windows/Ubuntu reconciliation CI passed at `7a261c8`; macOS remains a manual opt-in. Exact outcomes and existing CI skips are recorded below. |
+| Latest reviewed upstream commit | [`1848f11dc4e22458943fef14dd4c229c78767f8b`](https://github.com/coverlet-coverage/coverlet/commit/1848f11dc4e22458943fef14dd4c229c78767f8b); source commit dated 2026-11-16 in the author's time zone |
+| Latest sync operation | 2026-11-16; selective upstream merge on `vNext/sync-with-upstream`; no retained file changes to port |
+| Codebelt baseline | [`903b787645c9ba5ce7f4bd8f1156304d74c5a40d`](https://github.com/codebeltnet/coverlet/commit/903b787645c9ba5ce7f4bd8f1156304d74c5a40d), identical to fetched `origin/master` |
+| Upstream ancestry merge | The merge containing this entry records the Codebelt baseline first and `1848f11` second. Earlier merge [`d66c8f1`](https://github.com/codebeltnet/coverlet/commit/d66c8f1ec9222faa23a0bc64ce3d568bf783ca73) already records `f37bf3d`. |
+| Destination integration | Earlier sync [PR #8](https://github.com/codebeltnet/coverlet/pull/8) is integrated at [`14e9e75`](https://github.com/codebeltnet/coverlet/commit/14e9e7554f698164bef408c4c55c1ba47cd6a928). The remote `v11.0.0` tag points to [`9104773`](https://github.com/codebeltnet/coverlet/commit/9104773e5e1f14a337abd9efde4175799d39ce70), matching the root changelog's 11.0.0 entry; publication was not rechecked. The latest upstream snapshot is pending integration. |
+| Validation | 2026-11-16: Windows Release solution build passed with zero warnings/errors on SDK 11.0.100, including core/MTP `netstandard2.0;net10.0;net11.0`. Tests were not run, as requested. Earlier validation results remain historical evidence below. |
 
 ## Original marker and release tags
 
@@ -50,6 +50,23 @@ These are the meaningful differences at the reviewed snapshots. They include exi
 The `netstandard2.0` embedded tracker in `src/coverlet.template` is retained from upstream. Branch reachability and local-function instrumentation described below are upstream changes, rather than independently introduced Codebelt coverage rules.
 
 ## Synchronization history
+
+### 2026-11-16: review upstream release metadata and retain ancestry
+
+Operation date: 2026-11-16. Reviewed `coverlet-coverage/coverlet:master` at [`1848f11dc4e22458943fef14dd4c229c78767f8b`](https://github.com/coverlet-coverage/coverlet/commit/1848f11dc4e22458943fef14dd4c229c78767f8b), fetched without tags. The shared comparison base is [`f37bf3d1ea8795cc1bdc57b29ad2ec81d10c9f1a`](https://github.com/coverlet-coverage/coverlet/commit/f37bf3d1ea8795cc1bdc57b29ad2ec81d10c9f1a). The clean, maintainer-created `vNext/sync-with-upstream` branch starts at fork baseline `903b787645c9ba5ce7f4bd8f1156304d74c5a40d`, identical to fetched `origin/master`; there is no outstanding baseline integration needed. Before merging, `git rev-list --left-right --count HEAD...coverlet-upstream/master` reports 46 fork-only commits and two upstream-only commits.
+
+| Upstream source | Disposition |
+| --- | --- |
+| [`a84a5a9ab1dda0fc0aa223542d1b4398c34559f4`, #2072](https://github.com/coverlet-coverage/coverlet/commit/a84a5a9ab1dda0fc0aa223542d1b4398c34559f4) | Exclude the upstream 10.1.1 release date in removed `Documentation/Changelog.md` and stable version in removed `version.json`. Neither applies to Codebelt's independently versioned package. |
+| [`1848f11dc4e22458943fef14dd4c229c78767f8b`, #2073](https://github.com/coverlet-coverage/coverlet/commit/1848f11dc4e22458943fef14dd4c229c78767f8b) | Exclude the upstream `10.1.2-preview.{height}` Nerdbank version change. Retain MinVer `v*` tags and existing release guards. |
+
+Both incoming commits were reviewed in full. Neither changes production code, dependencies, public APIs, or tests. A normal `git merge --no-ff --no-commit 1848f11dc4e22458943fef14dd4c229c78767f8b` produced only two modify/delete conflicts. Each was resolved individually by retaining the deletion of the excluded upstream file. There were no automatic retained-file changes. Only this ledger differs from the fork baseline; the root changelog is unchanged because there are no adopted product changes. Codebelt package/assembly identities, all three framework groups, dependencies, excluded surfaces, MinVer configuration, and release guards remain identical to the baseline.
+
+The earlier reviewed snapshot `f37bf3d` is already an ancestor of fetched `origin/master`. Inspection of local history confirms PR #8's merge at `14e9e7554f698164bef408c4c55c1ba47cd6a928` on 2026-11-04 (integration-commit date), preserving both parents. The remote `v11.0.0` tag target was verified as `9104773e5e1f14a337abd9efde4175799d39ce70`; its integration-commit date and root changelog date are 2026-11-10. No tag creation date or package-publication result is inferred. These observations supersede the pending PR #8 statements in earlier preparation records, which are preserved below.
+
+Validation: on Windows x64, SDK `11.0.100`, `dotnet build coverlet.slnx -c Release -p:PrepareValidationPackage=false --nologo -v:minimal` passed with zero warnings and zero errors. Core and MTP compiled for .NET Standard 2.0, .NET 10, and .NET 11; retained test projects compiled for .NET 10/11 without execution. The maintainer selected build-only validation. No tests, package creation/inspection, release guards, or remote CI were executed for this operation. Baseline-identical package/project configuration was inspected; no new package-validation result is claimed.
+
+The maintainer approved the local merge commit using the configured bot identity. The normal two-parent merge containing this record retains both reviewed upstream commits as ancestors, with the fork baseline first and the pinned upstream tip second. The resulting branch has 47 fork-only commits and zero upstream-only commits against the reviewed snapshot. Destination PR/integration, Linux/Windows/macOS CI, and post-integration remote ancestry checks remain pending. Integrate the synchronization PR using **Create a merge commit**, never squash or rebase. This operation does not release or publish a package.
 
 ### 2026-11-04: reconcile PR #8 with the released 10.1.2 fixes
 
